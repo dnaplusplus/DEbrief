@@ -1,7 +1,7 @@
 '''
-synbiochem (c) University of Manchester 2015
+DEbrief (c) University of Manchester 2015
 
-synbiochem is licensed under the MIT License.
+DEbrief is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -30,20 +30,23 @@ def home():
 @_APP.route('/result/<result_id>')
 def get_result(result_id):
     '''Gets result from id.'''
-    entry = 'P46882'
+    entry = result_id
     result = {}
     result['id'] = result_id
-    result['uniprot_entry'] = entry
     _get_uniprot_data(entry, result)
     return json.dumps(result)
 
 
-def _get_uniprot_data(entry, result):
+def _get_uniprot_data(entry, res):
     '''Gets Uniprot data (sequence and secondary structure).'''
-    fields = ['sequence', 'feature(BETA%20STRAND)', 'feature(HELIX)',
-              'feature(TURN)']
+    fields = ['sequence', 'database(PDB)', 'feature(BETA STRAND)',
+              'feature(HELIX)', 'feature(TURN)']
     uniprot_data = sequence_utils.get_uniprot_values([entry], fields)
-    result.update(uniprot_data['entry'])
+    res.update(uniprot_data[entry])
+    res['Cross-reference (PDB)'] = res['Cross-reference (PDB)'].split(';')
+    res['Beta strand'] = res['Beta strand'].split('.; ')
+    res['Helix'] = res['Helix'].split('.; ')
+    res['Turn'] = res['Turn'].split('.; ')
 
 if __name__ == '__main__':
     _APP.run(threaded=True)

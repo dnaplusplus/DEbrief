@@ -16,18 +16,14 @@
 			
 			$("#form").submit(function()
 			{
+				$("#result-panel").hide();
 				event.preventDefault();
-				event.unbind();
 				
-				$.get("/result", $(this).serializeArray(), function(data)
+				$.get("/result/" + $("#result_id").val(), function(data)
 				{
-					json = data
-			    	
-					if(json.result)
-					{
-						$("#result").html("<pre>" + JSON.stringify(json, null, ' ') + "</pre>")
-						$("#result-panel").show();
-					};
+					json = JSON.parse(data)
+					$("#result").html("<pre>" + JSON.stringify(json, null, ' ') + "</pre>")
+					$("#result-panel").show();
 				});
 			});
 		});
@@ -50,10 +46,10 @@
 	<div class="container">
 		<form id="form" class="form-horizontal" role="form">
 			<div class="form-group">
-				<label class="control-label col-sm-2" for="organism">Result id:</label>
+				<label class="control-label col-sm-2" for="result_id">Result id:</label>
 				<div class="col-sm-10">
 					<input type="text" class="form-control" id="result_id"
-						name="organism" placeholder="Enter result id">
+						name="result_id" placeholder="Enter result id">
 				</div>
 			</div>
 			<div class="form-group">
