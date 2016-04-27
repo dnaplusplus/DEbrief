@@ -48,7 +48,8 @@ def _get_uniprot_data(entry, res):
     uniprot_data = sequence_utils.get_uniprot_values([entry], fields)
     res.update(uniprot_data[entry])
 
-    res['Cross-reference (PDB)'] = res['Cross-reference (PDB)'].split(';')
+    res['Cross-reference (PDB)'] = [
+        val for val in res['Cross-reference (PDB)'].split(';') if len(val) > 0]
     res['Beta strand'] = _get_secondary_data(res['Beta strand'])
     res['Helix'] = _get_secondary_data(res['Helix'])
     res['Turn'] = _get_secondary_data(res['Turn'])
