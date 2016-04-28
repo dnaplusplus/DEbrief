@@ -32,8 +32,7 @@
 				$.get("/result/" + $("#search_term").val(), function(data)
 				{
 					json = JSON.parse(data)
-					$("#result").html("<pre>" + JSON.stringify(json, null, ' ') + "</pre>")
-					$("#result-panel").show();
+					// $("#result").html("<pre>" + JSON.stringify(json, null, ' ') + "</pre>")
 					
 					if(json["Sequence"].length > 0)
 					{
@@ -76,7 +75,7 @@
 	</nav>
 	  
 	<!-- Sequence panel. -->
-	<div class="container">
+	<div class="col-md-6">
 		<div id="sequence-panel" class="panel panel-default">
 	  		<div class="panel-heading">Sequences</div>
 	  		<div class="panel-body">
@@ -86,7 +85,7 @@
 	</div>
 	
 	<!-- Structure panel. -->
-	<div class="container">
+	<div class="col-md-6">
 		<div id="structure-panel" class="panel panel-default">
 		  <div class="panel-heading">Structure</div>
 		  <div class="panel-body">
@@ -96,10 +95,12 @@
 	</div>
 	
 	<!-- Temporary results panel. -->
+	<!--
 	<div class="container">
 		<div id="result-panel" class="panel panel-default">
 	  		<div class="panel-heading">Result</div>
 	  		<div id="result" class="panel-body"></div>
 		</div>
 	</div>
+	 -->
 </body>
