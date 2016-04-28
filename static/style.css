@@ -19,6 +19,21 @@
 	width: 100%;
 }
 
+.panel-body
+{
+    position: relative;
+    height: 100%;
+}
+
+.panel-fill
+{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
 .centered
 {
 	width: 100%;
@@ -41,6 +56,11 @@
     display: block;
     width: 100%;
     color: black;
+}
+
+#sequence
+{
+	word-wrap: break-word;
 }
 
 #result

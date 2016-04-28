@@ -8,15 +8,116 @@
 	<script	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script	src="http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.min.js"></script>
 	<script src="https://www.google.com/jsapi"></script>
+	<script src="http://3Dmol.csb.pitt.edu/build/3Dmol.js"></script>
 	<script src="static/utils.js"></script>
 	<script>
+		var glviewer = null;
+		var labels = [];
+	
+		var addLabels = function()
+		{
+			var atoms = glviewer.getModel().selectedAtoms(
+			{
+				atom : "CA"
+			});
+			
+			for(var a in atoms)
+			{
+				var atom = atoms[a];
+	
+				var l = glviewer.addLabel(atom.resn + " " + atom.resi,
+				{
+					inFront : true,
+					fontSize : 12,
+					position : {
+						x : atom.x,
+						y : atom.y,
+						z : atom.z
+					}
+				});
+				atom.label = l;
+				labels.push(atom);
+			}
+		};
+		
+		var colorSS = function(viewer)
+		{
+			//color by secondary structure
+			var m = viewer.getModel();
+			m.setColorByFunction({}, function(atom)
+			{
+				if(atom.ss == 'h') return "magenta";
+				else if(atom.ss == 's') return "orange";
+				else return "white";
+			});
+			viewer.render();
+		}
+	
+		var atomcallback = function(atom, viewer)
+		{
+			if(atom.clickLabel === undefined
+					|| !atom.clickLabel instanceof $3Dmol.Label)
+			{
+				atom.clickLabel = viewer.addLabel(atom.elem + atom.serial,
+				{
+					fontSize : 14,
+					position : {
+						x : atom.x,
+						y : atom.y,
+						z : atom.z
+					},
+					backgroundColor: "black"
+				});
+				atom.clicked = true;
+			}
+	
+			//toggle label style
+			else
+			{
+				if(atom.clicked)
+				{
+					var newstyle = atom.clickLabel.getStyle();
+					newstyle.backgroundColor = 0x66ccff;
+	
+					viewer.setLabelStyle(atom.clickLabel, newstyle);
+					atom.clicked = !atom.clicked;
+				}
+				else
+				{
+					viewer.removeLabel(atom.clickLabel);
+					delete atom.clickLabel;
+					atom.clicked = false;
+				}
+			}
+		};
+		
+		var readText = function(input,func)
+		{
+			if(input.files.length > 0)
+			{
+				var file = input.files[0];
+				var reader = new FileReader();
+			    reader.onload = function(evt)
+			    {
+			    	func(evt.target.result,file.name);
+			    };
+			    reader.readAsText(file);
+			    $(input).val('');
+			}
+		};
+			
 		$(document).ready(function()
 		{
 			$("#result-panel").hide();
+			$("#sequence-panel").hide();
+			$("#structure-panel").hide();
 			
+			// Form submission:
 			$("#form").submit(function()
 			{
 				$("#result-panel").hide();
+				$("#sequence-panel").hide();
+				$("#structure-panel").hide();
 				event.preventDefault();
 				
 				$.get("/result/" + $("#result_id").val(), function(data)
@@ -24,8 +125,42 @@
 					json = JSON.parse(data)
 					$("#result").html("<pre>" + JSON.stringify(json, null, ' ') + "</pre>")
 					$("#result-panel").show();
+					
+					if(json["Sequence"].length > 0)
+					{
+						$("#sequence").html("<pre>" + json["Sequence"] + "</pre>")
+						$("#sequence-panel").show();
+					}
+					
+					if(json["Cross-reference (PDB)"].length > 0)
+					{
+						$("#structure-panel").show();
+					}
 				});
 			});
+			
+			// PDB viewing:
+			glviewer = $3Dmol.createViewer("gldiv",
+			{
+				defaultcolors : $3Dmol.rasmolElementColors
+			});
+			
+			glviewer.setBackgroundColor(0x00ffff);
+
+			m = $3Dmol.download('pdb:2VVM', glviewer, {doAssembly:true, noSecondaryStructure: false});
+
+			atoms = m.selectedAtoms({});
+
+			for(var i in atoms)
+			{
+				var atom = atoms[i];
+				atom.clickable = true;
+				atom.callback = atomcallback;
+			}
+
+			glviewer.mapAtomProperties($3Dmol.applyPartialCharges);
+			glviewer.zoomTo();
+			glviewer.render();
 		});
 	</script>
 </head>
@@ -58,6 +193,26 @@
 				</div>
 			</div>
 		</form>
+	</div>
+	
+	<!-- Sequence panel. -->
+	<div class="container">
+		<div id="sequence-panel" class="panel panel-default">
+	  		<div class="panel-heading">Sequences</div>
+	  		<div class="panel-body">
+	  			<div class="panel-fill" id="sequence"></div>
+	  		</div>
+		</div>
+	</div>
+	
+	<!-- Structure panel. -->
+	<div class="container">
+		<div id="structure-panel" class="panel panel-default">
+		  <div class="panel-heading">Structure</div>
+		  <div class="panel-body">
+		  		<div class="panel-fill" id="gldiv"></div>
+		  </div>
+		</div>
 	</div>
 	
 	<!-- Temporary results panel. -->

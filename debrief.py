@@ -57,9 +57,11 @@ def _get_uniprot_data(entry, res):
 
 def _get_secondary_data(strng):
     '''Gets secondary structure data.'''
-    fields = ['start', 'end', 'pdb']
-    return [dict(zip(fields, _parse_secondary_struct(s)))
-            for s in strng.split('.; ')]
+    if len(strng) > 0:
+        fields = ['start', 'end', 'pdb']
+        return [dict(zip(fields, _parse_secondary_struct(s)))
+                for s in strng.split('.; ')]
+    return []
 
 
 def _parse_secondary_struct(strng):
