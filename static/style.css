@@ -22,40 +22,22 @@
 .panel-body
 {
     position: relative;
+    padding: 0px;
     height: 100%;
 }
 
 .panel-fill
 {
-    position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
 }
 
-.centered
+#structure-viewer
 {
-	width: 100%;
-	margin: 0 auto;
-}
- 
-.progress-gauge
-{
- 	display: inline-block;
-}
-
-.progress
-{
-    position: relative;
-}
-
-.progress span
-{
-    position: absolute;
-    display: block;
-    width: 100%;
-    color: black;
+	width: 500px;
+	height: 500px;
 }
 
 #sequence
