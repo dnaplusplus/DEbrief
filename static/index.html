@@ -8,7 +8,11 @@
 	<script src="static/bio-pv.min.js"></script>
 	<script>
 		$(document).ready(function()
-		{	
+		{
+			// Hold PDB data:
+			var pdbIds = null;
+			var pdbIndex = 0;
+			
 			// Initialise structure viewer:
 			var options = {
 				width: 'auto',
@@ -29,30 +33,49 @@
 			$("#search").submit(function()
 			{
 				event.preventDefault();
+				viewer.clear();
 				
 				$.get("/result/" + $("#search_term").val(), function(data)
 				{
-					json = JSON.parse(data)
+					result = JSON.parse(data)
 					
-					if(json["Sequence"].length > 0)
+					if(result["Sequence"].length > 0)
 					{
-						$("#sequence-viewer").html("<pre>" + json["Sequence"] + "</pre>")
+						$("#sequence-viewer").html("<pre>" + result["Sequence"] + "</pre>")
 						$("#sequence-panel").show();
 					}
 					
-					if(json["Cross-reference (PDB)"].length > 0)
-					{
-						pdb = json["Cross-reference (PDB)"][0]
-						
-						pv.io.fetchPdb('http://files.rcsb.org/download/' + json["Cross-reference (PDB)"][0] + '.pdb', function(structure)
-						{
-							viewer.clear();
-							viewer.cartoon('protein', structure, {color: color.bySS()});
-							viewer.centerOn(structure);
-						});
-					}
+					pdbIds = result["Cross-reference (PDB)"]
+					pdbIndex = 0
+					updateStructure(0)
 				});
 			});
+
+			$("#next").click(function()
+			{
+				updateStructure(1);
+			});
+			
+			$("#previous").click(function()
+			{
+				updateStructure(-1);
+			});
+			
+			function updateStructure(increment)
+			{
+				pdbIndex = pdbIndex + increment;
+				$("#next").prop('disabled', pdbIndex >= pdbIds.length - 1);
+				$("#previous").prop('disabled', pdbIndex == 0);
+				
+				if(pdbIds.length > 0)
+				{
+					pv.io.fetchPdb('http://files.rcsb.org/download/' + pdbIds[pdbIndex] + '.pdb', function(structure)
+					{
+						viewer.cartoon('protein', structure, {color: color.bySS()});
+						viewer.centerOn(structure);
+					});
+				}
+			}
 		});
 	</script>
 </head>
@@ -86,8 +109,18 @@
 	<!-- Structure panel. -->
 	<div class="col-md-6">
 		<div id="structure-panel" class="panel panel-default">
-		  <div class="panel-heading">Structure</div>
-		  <div id="structure-viewer" class="result-panel panel-body"></div>
+			<div class="panel-heading">Structure</div>
+			<div id="structure-manager" class="result-panel panel-body">
+				<div id="structure-viewer"></div>
+				<div id="structure-controller">
+					<button id="previous" type="button" class="btn btn-default btn-sm" disabled>
+  						<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+					</button>
+					<button id="next" type="button" class="btn btn-default btn-sm" disabled>
+  						<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+					</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>

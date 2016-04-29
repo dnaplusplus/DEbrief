@@ -1,9 +1,10 @@
-.result-panel
-{
-	height: 500px;
-}
-
 #structure-viewer
 {
-	padding: 0px;
+	height: 450px;
+	padding-bottom: 15px;
+}
+
+#structure-controller
+{
+	text-align: center;
 }
