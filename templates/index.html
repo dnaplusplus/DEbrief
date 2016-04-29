@@ -23,6 +23,7 @@
 			};
 			
 			var viewer = pv.Viewer(document.getElementById('structure-viewer'), options);
+			viewer.fitParent();
 			
 			// Form submission:
 			$("#search").submit(function()
@@ -46,12 +47,18 @@
 						
 						pv.io.fetchPdb('http://files.rcsb.org/download/' + json["Cross-reference (PDB)"][0] + '.pdb', function(structure)
 						{
-						      viewer.cartoon('protein', structure, {color: color.bySS()});
-						      viewer.centerOn(structure);
+							viewer.clear();
+							viewer.cartoon('protein', structure, {color: color.bySS()});
+							viewer.centerOn(structure);
 						});
 					}
 				});
 			});
+			
+			window.onresize = function(event)
+			{
+				viewer.fitParent();
+			}
 		});
 	</script>
 </head>
@@ -88,8 +95,8 @@
 	<div class="col-md-6">
 		<div id="structure-panel" class="panel panel-default">
 		  <div class="panel-heading">Structure</div>
-		  <div class="panel-body">
-		  		<div id="structure-viewer" class="panel-fill"></div>
+		  <div id="structure-viewer" class="panel-body">
+		  		
 		  </div>
 		</div>
 	</div>
