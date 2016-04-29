@@ -11,7 +11,7 @@ import json
 import re
 import uuid
 
-from flask import Flask, render_template
+from flask import Flask, send_from_directory
 
 from synbiochem.utils import sequence_utils
 
@@ -28,7 +28,7 @@ _APP.config.from_object(__name__)
 @_APP.route('/')
 def home():
     '''Renders homepage.'''
-    return render_template('index.html')
+    return send_from_directory('static', 'index.html')
 
 
 @_APP.route('/result/<result_id>')
