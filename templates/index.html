@@ -2,15 +2,10 @@
 <head>
 	<title>DEbrief</title>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<link rel="stylesheet" href="static/style.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="static/style.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-	<script	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-	<script	src="http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.min.js"></script>
-	<script src="https://www.google.com/jsapi"></script>
-	<script src='static/bio-pv.min.js'></script>
-	<script src="static/utils.js"></script>
+	<script src="static/bio-pv.min.js"></script>
 	<script>
 		$(document).ready(function()
 		{	
@@ -25,6 +20,11 @@
 			var viewer = pv.Viewer(document.getElementById('structure-viewer'), options);
 			viewer.fitParent();
 			
+			window.onresize = function(event)
+			{
+				viewer.fitParent();
+			}
+			
 			// Form submission:
 			$("#search").submit(function()
 			{
@@ -33,11 +33,10 @@
 				$.get("/result/" + $("#search_term").val(), function(data)
 				{
 					json = JSON.parse(data)
-					// $("#result").html("<pre>" + JSON.stringify(json, null, ' ') + "</pre>")
 					
 					if(json["Sequence"].length > 0)
 					{
-						$("#sequence").html("<pre>" + json["Sequence"] + "</pre>")
+						$("#sequence-viewer").html("<pre>" + json["Sequence"] + "</pre>")
 						$("#sequence-panel").show();
 					}
 					
@@ -54,11 +53,6 @@
 					}
 				});
 			});
-			
-			window.onresize = function(event)
-			{
-				viewer.fitParent();
-			}
 		});
 	</script>
 </head>
@@ -85,9 +79,7 @@
 	<div class="col-md-6">
 		<div id="sequence-panel" class="panel panel-default">
 	  		<div class="panel-heading">Sequences</div>
-	  		<div class="panel-body">
-	  			<div id="sequence" class="panel-fill"></div>
-	  		</div>
+	  		<div id="sequence-viewer" class="result-panel panel-body"></div>
 		</div>
 	</div>
 	
@@ -95,19 +87,7 @@
 	<div class="col-md-6">
 		<div id="structure-panel" class="panel panel-default">
 		  <div class="panel-heading">Structure</div>
-		  <div id="structure-viewer" class="panel-body">
-		  		
-		  </div>
+		  <div id="structure-viewer" class="result-panel panel-body"></div>
 		</div>
 	</div>
-	
-	<!-- Temporary results panel. -->
-	<!--
-	<div class="container">
-		<div id="result-panel" class="panel panel-default">
-	  		<div class="panel-heading">Result</div>
-	  		<div id="result" class="panel-body"></div>
-		</div>
-	</div>
-	 -->
 </body>
