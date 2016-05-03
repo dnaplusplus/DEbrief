@@ -37,17 +37,17 @@
 				
 				$.get("/result/" + $("#search_term").val(), function(data)
 				{
-					result = JSON.parse(data)
+					result = JSON.parse(data);
 					
 					if(result["Sequence"].length > 0)
 					{
-						$("#sequence-viewer").html("<pre>" + result["Sequence"] + "</pre>")
+						$("#sequence-viewer").html("<pre>" + result["Sequence"] + "</pre>");
 						$("#sequence-panel").show();
 					}
 					
-					pdbIds = result["Cross-reference (PDB)"]
-					pdbIndex = 0
-					updateStructure(0)
+					pdbIds = result["Cross-reference (PDB)"];
+					pdbIndex = 0;
+					updateStructure(0);
 				});
 			});
 
@@ -72,7 +72,7 @@
 					pv.io.fetchPdb('http://files.rcsb.org/download/' + pdbIds[pdbIndex] + '.pdb', function(structure)
 					{
 						viewer.cartoon('protein', structure, {color: color.bySS()});
-						viewer.centerOn(structure);
+						viewer.autoZoom();
 					});
 				}
 			}
