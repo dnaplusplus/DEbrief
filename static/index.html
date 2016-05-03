@@ -11,7 +11,9 @@
 		{
 			// Hold PDB data:
 			var pdbIds = null;
+			var structure = null;
 			var pdbIndex = 0;
+			var prevAtom = null;
 			
 			// Initialise structure viewer:
 			var options = {
@@ -21,6 +23,7 @@
 				quality: 'medium'
 			};
 			
+			var pvObj = null;
 			var viewer = pv.Viewer(document.getElementById("structure-viewer"), options);
 			viewer.fitParent();
 			
@@ -42,7 +45,17 @@
 					
 					if(result["Sequence"].length > 0)
 					{
-						setSequence(result["Sequence"]);
+						// Sequence:
+						for(var i = 0, len = result["Sequence"].length; i < len; i++)
+						{
+							$("#sequence-viewer").append("<div class='residue' data-residue='" + i + "' id='res_" + i + "'>" + result["Sequence"][i] + "</div>");
+						}
+						
+						$(".residue").mouseover(function()
+						{
+							highlightResidue($(this).data("residue"))
+						});
+						
 						setSecondaryStructure(result["Beta strand"], "beta-strand");
 						setSecondaryStructure(result["Helix"], "helix");
 						setSecondaryStructure(result["Turn"], "turn");
@@ -50,32 +63,19 @@
 					
 					pdbIds = result["Cross-reference (PDB)"];
 					pdbIndex = 0;
+					structure = null;
 					updateStructure(0);
 				});
 			});
-			
-			// Sequence:
-			function setSequence(sequence)
-			{
-				for(var i = 0, len = sequence.length; i < len; i++)
-				{
-					$("#sequence-viewer").append("<div class='residue' data-residue='" + i + "' id='res_" + i + "'>" + sequence[i] + "</div>");
-				}
-				
-				$(".residue").mouseover(function()
-				{
-					alert($(this).data("residue"))
-				});
-			}
-			
+
 			// Secondary structure:
 			function setSecondaryStructure(secStruct, className)
 			{
-				for(var i=0; i < secStruct.length; i++)
+				for(var i = 0; i < secStruct.length; i++)
 				{
 					obj = secStruct[i];
 					
-					for(var j = obj["start"]; j < obj["end"]; j++)
+					for(var j = obj["start"] - 1; j < obj["end"]; j++)
 					{
 						$("#res_" + j).addClass(className);
 					}
@@ -101,12 +101,53 @@
 				
 				if(pdbIds.length > 0)
 				{
-					pv.io.fetchPdb('http://files.rcsb.org/download/' + pdbIds[pdbIndex] + '.pdb', function(structure)
+					pv.io.fetchPdb('http://files.rcsb.org/download/' + pdbIds[pdbIndex] + '.pdb', function(struct)
 					{
-						viewer.cartoon('protein', structure, {color: color.bySS()});
+						structure = struct;
+						pvObj = viewer.cartoon('protein', structure, {color: color.bySS()});
 						viewer.autoZoom();
 					});
 				}
+			}
+			
+			function highlightResidue(index)
+			{
+				if(structure != null)
+				{
+					var atom = structure.atom('A.' + index + '.CA');
+					// viewer.label('label', atom.qualifiedName(), atom.pos(), options);
+					
+					if(prevAtom !== null && atom === prevAtom.atom)
+					{
+						return;
+					}
+					
+					if(prevAtom !== null)
+					{
+						setColorForAtom(prevAtom.atom, prevAtom.color);
+					}
+					
+					if(atom !== null)
+					{
+						var color = [0,0,0,0];
+						pvObj.getColorForAtom(atom, color);
+						prevAtom = {atom: atom, color: color};
+						setColorForAtom(atom, 'red');
+					}
+					else
+					{
+						prevAtom = null;
+					}
+					
+					viewer.requestRedraw();
+				}
+			}
+			
+			function setColorForAtom(atom, color)
+			{
+			    var view = structure.createEmptyView();
+			    view.addAtom(atom);
+			    pvObj.colorBy(pv.color.uniform(color), view);
 			}
 		});
 	</script>
