@@ -1,3 +1,25 @@
+.residue
+{
+	font-family: monospace;
+	font-size: small;
+	display: inline-block;	
+}
+
+.beta-strand
+{
+	background-color: rgb(153,153,229);
+}
+
+.helix
+{
+	background-color: rgb(51,204,51);
+}
+
+.turn
+{
+	background-color: rgb(204,204,204);
+}
+
 #structure-viewer
 {
 	height: 450px;
