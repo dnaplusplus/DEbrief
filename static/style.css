@@ -1,10 +1,10 @@
 #structure-viewer
 {
 	height: 450px;
-	padding-bottom: 15px;
 }
 
 #structure-controller
 {
+	padding-top: 15px;
 	text-align: center;
 }
