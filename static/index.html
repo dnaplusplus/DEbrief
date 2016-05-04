@@ -98,6 +98,9 @@
 			
 			function updateStructure(increment)
 			{
+				viewer.clear();
+				viewer.requestRedraw();
+				
 				pdbIndex = pdbIndex + increment;
 				$("#next").prop('disabled', pdbIndex >= pdbIds.length - 1);
 				$("#previous").prop('disabled', pdbIndex == 0);
