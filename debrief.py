@@ -9,8 +9,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import json
 import re
+import tempfile
+import urllib
 import uuid
-
+from Bio import SeqIO
 from flask import Flask, send_from_directory
 
 from synbiochem.utils import sequence_utils
@@ -38,6 +40,7 @@ def get_result(result_id):
     result = {}
     result['id'] = result_id
     _get_uniprot_data(entry, result)
+    print json.dumps(result)
     return json.dumps(result)
 
 
@@ -49,10 +52,28 @@ def _get_uniprot_data(entry, res):
     res.update(uniprot_data[entry])
 
     res['Cross-reference (PDB)'] = [
-        val for val in res['Cross-reference (PDB)'].split(';') if len(val) > 0]
+        _get_pdb_data(pdb_id)
+        for pdb_id in res['Cross-reference (PDB)'].split(';')
+        if len(pdb_id) > 0]
+
     res['Beta strand'] = _get_secondary_data(res['Beta strand'])
     res['Helix'] = _get_secondary_data(res['Helix'])
     res['Turn'] = _get_secondary_data(res['Turn'])
+
+
+def _get_pdb_data(pdb_id):
+    '''Returns PDB sequence data.'''
+    url = 'http://www.rcsb.org/pdb/download/downloadFile.do' + \
+        '?fileFormat=FASTA&compression=NO&structureId=' + \
+        pdb_id
+
+    temp_file = tempfile.NamedTemporaryFile()
+    urllib.urlretrieve(url, temp_file.name)
+    fasta_seqs = SeqIO.parse(open(temp_file.name), 'fasta')
+
+    return {'id': pdb_id, 'chains': {fasta.id[len(pdb_id) + 1:len(pdb_id) + 2]:
+                                     str(fasta.seq)
+                                     for fasta in fasta_seqs}}
 
 
 def _get_secondary_data(strng):

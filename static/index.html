@@ -10,7 +10,7 @@
 		$(document).ready(function()
 		{
 			// Hold PDB data:
-			var pdbIds = null;
+			var pdbData = null;
 			var pdbIndex = 0;
 			
 			// Initialise structure viewer:
@@ -38,7 +38,7 @@
 			{
 				event.preventDefault();
 				$("#sequence-viewer").empty();
-				viewer.clear();
+				clearStructure();
 				
 				$.get("/result/" + $("#search_term").val(), function(data)
 				{
@@ -62,11 +62,8 @@
 						setSecondaryStructure(result["Turn"], "turn");
 					}
 					
-					pdbIds = result["Cross-reference (PDB)"];
+					pdbData = result["Cross-reference (PDB)"];
 					pdbIndex = 0;
-					mol = null;
-					geom = null;
-					selectedAtoms = [];
 					updateStructure(0);
 				});
 			});
@@ -86,6 +83,15 @@
 			}
 
 			// Structure:
+			function clearStructure()
+			{
+				mol = null;
+				geom = null;
+				selectedAtoms = [];
+				viewer.clear();
+				viewer.requestRedraw();
+			}
+			
 			$("#next").click(function()
 			{
 				updateStructure(1);
@@ -98,16 +104,15 @@
 			
 			function updateStructure(increment)
 			{
-				viewer.clear();
-				viewer.requestRedraw();
+				clearStructure();
 				
 				pdbIndex = pdbIndex + increment;
-				$("#next").prop('disabled', pdbIndex >= pdbIds.length - 1);
+				$("#next").prop('disabled', pdbIndex >= pdbData.length - 1);
 				$("#previous").prop('disabled', pdbIndex == 0);
 				
-				if(pdbIds.length > 0)
+				if(pdbData.length > 0)
 				{
-					pv.io.fetchPdb('http://files.rcsb.org/download/' + pdbIds[pdbIndex] + '.pdb', function(newMol)
+					pv.io.fetchPdb('http://files.rcsb.org/download/' + pdbData[pdbIndex]['id'] + '.pdb', function(newMol)
 					{
 						mol = newMol;
 						geom = viewer.cartoon('protein', mol, {color: color.bySS()});
