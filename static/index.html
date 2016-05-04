@@ -11,9 +11,7 @@
 		{
 			// Hold PDB data:
 			var pdbIds = null;
-			var structure = null;
 			var pdbIndex = 0;
-			var prevAtom = null;
 			
 			// Initialise structure viewer:
 			var options = {
@@ -22,9 +20,12 @@
 				antialias: true,
 				quality: 'medium'
 			};
-			
-			var pvObj = null;
+
 			var viewer = pv.Viewer(document.getElementById("structure-viewer"), options);
+			var mol = null;
+			var geom = null;
+			var selectedAtoms = [];
+			
 			viewer.fitParent();
 			
 			window.onresize = function(event)
@@ -63,7 +64,9 @@
 					
 					pdbIds = result["Cross-reference (PDB)"];
 					pdbIndex = 0;
-					structure = null;
+					mol = null;
+					geom = null;
+					selectedAtoms = [];
 					updateStructure(0);
 				});
 			});
@@ -101,10 +104,11 @@
 				
 				if(pdbIds.length > 0)
 				{
-					pv.io.fetchPdb('http://files.rcsb.org/download/' + pdbIds[pdbIndex] + '.pdb', function(struct)
+					pv.io.fetchPdb('http://files.rcsb.org/download/' + pdbIds[pdbIndex] + '.pdb', function(newMol)
 					{
-						structure = struct;
-						pvObj = viewer.cartoon('protein', structure, {color: color.bySS()});
+						mol = newMol;
+						geom = viewer.cartoon('protein', mol, {color: color.bySS()});
+						selectedAtoms = [];
 						viewer.autoZoom();
 					});
 				}
@@ -112,31 +116,33 @@
 			
 			function highlightResidue(index)
 			{
-				if(structure != null)
+				if(mol != null)
 				{
-					var atom = structure.atom('A.' + index + '.CA');
-					// viewer.label('label', atom.qualifiedName(), atom.pos(), options);
-					
-					if(prevAtom !== null && atom === prevAtom.atom)
+					// Revert currently selected atoms:
+					for(var i = 0; i < selectedAtoms.length; i++)
 					{
-						return;
+						setColorForAtom(selectedAtoms[i].atom, selectedAtoms[i].color);
 					}
+				
+					selectedAtoms = [];
 					
-					if(prevAtom !== null)
-					{
-						setColorForAtom(prevAtom.atom, prevAtom.color);
-					}
+					// Colour newly selected atoms in each chain:
+					var chains = mol.chains();
 					
-					if(atom !== null)
+					for(var i = 0; i < chains.length; i++)
 					{
-						var color = [0,0,0,0];
-						pvObj.getColorForAtom(atom, color);
-						prevAtom = {atom: atom, color: color};
-						setColorForAtom(atom, 'red');
-					}
-					else
-					{
-						prevAtom = null;
+						var chainName = chains[i].name();
+						var atom = mol.atom(chainName + '.' + index + '.CA');
+						
+						// viewer.label('label', atom.qualifiedName(), atom.pos(), options);
+						
+						if(atom !== null)
+						{
+							var color = [0,0,0,0];
+							geom.getColorForAtom(atom, color);
+							selectedAtoms.push({atom: atom, color: color});
+							setColorForAtom(atom, 'red');
+						}
 					}
 					
 					viewer.requestRedraw();
@@ -145,9 +151,9 @@
 			
 			function setColorForAtom(atom, color)
 			{
-			    var view = structure.createEmptyView();
+			    var view = mol.createEmptyView();
 			    view.addAtom(atom);
-			    pvObj.colorBy(pv.color.uniform(color), view);
+			    geom.colorBy(pv.color.uniform(color), view);
 			}
 		});
 	</script>
