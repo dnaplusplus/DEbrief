@@ -12,6 +12,7 @@ import re
 import tempfile
 import urllib
 import uuid
+
 from Bio import SeqIO
 from flask import Flask, send_from_directory
 
@@ -40,7 +41,6 @@ def get_result(result_id):
     result = {}
     result['id'] = result_id
     _get_uniprot_data(entry, result)
-    print json.dumps(result)
     return json.dumps(result)
 
 

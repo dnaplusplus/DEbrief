@@ -90,6 +90,7 @@
 				selectedAtoms = [];
 				viewer.clear();
 				viewer.requestRedraw();
+				setStructureText("&nbsp;");
 			}
 			
 			$("#next").click(function()
@@ -142,19 +143,27 @@
 						var chainName = chains[i].name();
 						var atom = mol.atom(chainName + '.' + index + '.CA');
 						
-						// viewer.label('label', atom.qualifiedName(), atom.pos(), options);
-						
 						if(atom !== null)
 						{
 							var color = [0,0,0,0];
 							geom.getColorForAtom(atom, color);
 							selectedAtoms.push({atom: atom, color: color});
 							setColorForAtom(atom, 'red');
+							setStructureText(atom.qualifiedName().split(".")[1]);
+						}
+						else
+						{
+							setStructureText("&nbsp;");
 						}
 					}
 					
 					viewer.requestRedraw();
 				}
+			}
+			
+			function setStructureText(name)
+			{
+				document.getElementById("structure-text").innerHTML = name;
 			}
 			
 			function setColorForAtom(atom, color)
@@ -199,6 +208,7 @@
 			<div class="panel-heading">Structure</div>
 			<div id="structure-manager" class="result-panel panel-body">
 				<div id="structure-viewer"></div>
+				<div id="structure-text">&nbsp;</div>
 				<div id="structure-controller">
 					<button id="previous" type="button" class="btn btn-default btn-sm" disabled>
   						<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>

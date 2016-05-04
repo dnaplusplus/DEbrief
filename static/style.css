@@ -7,12 +7,12 @@
 
 .beta-strand
 {
-	background-color: rgb(153,153,229);
+	background-color: rgb(51,204,51);
 }
 
 .helix
 {
-	background-color: rgb(51,204,51);
+	background-color: rgb(153,153,229);
 }
 
 .turn
@@ -23,6 +23,11 @@
 #structure-viewer
 {
 	height: 450px;
+}
+
+#structure-text
+{
+	text-align: center;
 }
 
 #structure-controller
