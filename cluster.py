@@ -11,7 +11,6 @@ from matplotlib import pyplot
 from scipy.cluster.hierarchy import dendrogram, linkage
 import random
 
-from mpl_toolkits.mplot3d import Axes3D
 from synbiochem.utils import sequence_utils
 
 
@@ -20,8 +19,10 @@ def _get_sequence_data(num, length):
     data = []
     labels = []
 
+    parent_seq = sequence_utils.get_random_aa(length)
+
     for _ in range(num):
-        seq = sequence_utils.get_random_aa(length)
+        seq = _mutate(parent_seq)
         val = 0.1 + (random.random() * 0.8)
         data.append(sequence_utils.get_aa_props(seq)[0] + [val])
         labels.append(seq + ',' + '{0:.2f}'.format(val))
@@ -29,15 +30,15 @@ def _get_sequence_data(num, length):
     return data, labels
 
 
-def _plot_data(data):
-    '''Plots data.'''
-    fig = pyplot.figure()
-    plt_axes = fig.add_subplot(111, projection='3d')
-    plt_axes.scatter([datum[0] for datum in data],
-                     [datum[1] for datum in data],
-                     [datum[2] for datum in data],
-                     zdir='z', c='red')
-    pyplot.show()
+def _mutate(seq, max_mutations=3):
+    '''Mutates a given sequence.'''
+    seq_lst = list(seq)
+
+    for _ in range(random.randint(0, max_mutations)):
+        seq_lst[random.randint(0, len(seq_lst) - 1)] = \
+            random.choice(sequence_utils.AA_PROPS.keys())
+
+    return ''.join(seq_lst)
 
 
 def _cluster(data):
@@ -45,25 +46,51 @@ def _cluster(data):
     return linkage(data, 'ward')
 
 
-def _plot_dendrogram(clusters, labels=None):
+def _plot_dendrogram(data, clusters, labels=None):
     '''Calculate full dendrogram.'''
-    pyplot.figure()
-    pyplot.title('Hierarchical Clustering Dendrogram')
-    pyplot.xlabel('sample index')
-    pyplot.ylabel('distance')
-    dendrogram(clusters,
-               leaf_font_size=8.0,  # font size for the x axis labels
-               labels=labels,
-               )
-    pyplot.show()
+    # pyplot.figure()
+    # pyplot.title('Hierarchical Clustering Dendrogram')
+    # pyplot.xlabel('Distance')
+    # pyplot.ylabel('Sequence / activity')
+    # ddg = dendrogram(clusters, labels=labels, orientation='right',
+    # truncate_mode='lastp', p=10
+    #                )
+    # pyplot.show()
+
+    fig = pyplot.figure()
+    ax1 = fig.add_axes([0.1, 0.1, 0.1, 0.8])
+    ddg = dendrogram(
+        clusters,
+        labels=labels,
+        leaf_font_size=6,
+        leaf_rotation=90,
+        orientation='right')
+    ax1.set_xticks([])
+    # ax1.set_yticks([])
+
+    # Plot distance matrix.
+    axmatrix = fig.add_axes([0.58, 0.1, 0.02, 0.8])
+    activities = [[data[i][-1]] for i in ddg['leaves']]
+    mat = axmatrix.matshow(
+        activities,
+        aspect='auto',
+        origin='lower',
+        cmap='hot')
+    axmatrix.set_xticks([])
+    axmatrix.set_yticks([])
+
+    # Plot colorbar.
+    axcolor = fig.add_axes([0.62, 0.1, 0.02, 0.8])
+    pyplot.colorbar(mat, cax=axcolor)
+    fig.show()
+    fig.savefig('dendrogram.png')
 
 
 def main():
     '''main method.'''
-    data, labels = _get_sequence_data(100, 2)
-    _plot_data(data)
+    data, labels = _get_sequence_data(20, 20)
     clusters = _cluster(data)
-    _plot_dendrogram(clusters, labels)
+    _plot_dendrogram(data, clusters, labels)
 
 if __name__ == '__main__':
     main()
