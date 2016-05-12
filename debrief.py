@@ -34,6 +34,12 @@ def home():
     return send_from_directory('static', 'index.html')
 
 
+@_APP.route('/heatmap')
+def heatmap():
+    '''Renders homepage.'''
+    return send_from_directory('static', 'heatmap.html')
+
+
 @_APP.route('/result/<result_id>')
 def get_result(result_id):
     '''Gets result from id.'''
