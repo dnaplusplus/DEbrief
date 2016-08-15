@@ -581,7 +581,7 @@ var InCHlib;
                               fontSize: 12,
                               padding: 8,
                               fill: 'white',
-                              fontStyle: "bold",
+                              // fontStyle: "bold",
                               listening: false,
                               align: "center",
                               lineHeight: 1.2,
@@ -609,7 +609,7 @@ var InCHlib;
           "heatmap_value": new Kinetic.Text({
                               fontFamily: self.settings.font,
                               fill: self.settings.heatmap_font_color,
-                              fontStyle: "bold",
+                              // fontStyle: "bold",
                               listening: false,
                           }),
 
@@ -620,7 +620,7 @@ var InCHlib;
 
           "column_header": new Kinetic.Text({
                               fontFamily: self.settings.font,
-                              fontStyle: "bold",
+                              // fontStyle: "bold",
                               fill: 'black',
                            }),
 
@@ -628,7 +628,7 @@ var InCHlib;
                           fontSize: 10,
                           fill: "#6d6b6a",
                           fontFamily: self.settings.font,
-                          fontStyle: 'bold',
+                          // fontStyle: "bold",
                           listening: false,
                        }),
 
@@ -1874,7 +1874,7 @@ var InCHlib;
       self.header_layer = new Kinetic.Layer();
       var count = self._hack_size(self.leaves_y_coordinates);
       var y = (self.settings.column_dendrogram && self.heatmap_header)? self.header_height+(self.pixels_for_leaf*count) + 10 + self.column_metadata_height: self.header_height - 20;
-      var rotation = (self.settings.column_dendrogram && self.heatmap_header) ? 45 : -45;
+      var rotation = (self.settings.column_dendrogram && self.heatmap_header) ? 0 : 0;
       var distance_step = 0;
       var x, i, column_header, key;
       var current_headers = [];
@@ -1993,7 +1993,7 @@ var InCHlib;
               text: distance,
               fontSize: 12,
               fontFamily: self.settings.font,
-              fontStyle: 'bold',
+              // fontStyle: "bold",
               fill: 'black',
               align: 'right',
               listening: false,

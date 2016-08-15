@@ -98,4 +98,4 @@ def _parse_secondary_struct(strng):
     return int(terms[0]), int(terms[1]), terms[2]
 
 if __name__ == '__main__':
-    _APP.run(threaded=True)
+    _APP.run(threaded=True, port=5001)

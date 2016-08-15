@@ -10,6 +10,15 @@
 	            var inchlib = new InCHlib(
 	            {
 	                target: "inchlib",
+	                count_column: true,
+	                navigation_toggle:
+	                {
+	                	"distance_scale": false,
+	                	"filter_button": false,
+	                	"export_button": false,
+	                	"color_scale": false,
+	                	"hint_button": false
+	                }
 	            });
 	
 	            inchlib.read_data_from_file("static/example.json");
