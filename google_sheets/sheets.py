@@ -15,13 +15,6 @@ from oauth2client import client, tools
 from oauth2client.file import Storage
 import httplib2
 
-
-try:
-    import argparse
-    FLAGS = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
-except ImportError:
-    FLAGS = None
-
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
 CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'DEBrief'
@@ -68,7 +61,7 @@ def _get_credentials():
     if not credentials or credentials.invalid:
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
         flow.user_agent = APPLICATION_NAME
-        credentials = tools.run_flow(flow, store, FLAGS)
+        credentials = tools.run_flow(flow, store, None)
 
     return credentials
 
@@ -78,7 +71,7 @@ def main():
 
     Creates a Sheets API service object and prints the names and majors of
     students in a sample spreadsheet:
-    https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+    https://docs.google_sheets.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
     '''
     sheet_id = '1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw'
     tab = 'MAO-N'
