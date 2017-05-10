@@ -1,5 +1,5 @@
 '''
-DEbrief (c) University of Manchester 2015
+DEbrief (c) University of Manchester 2017
 
 DEbrief is licensed under the MIT License.
 
