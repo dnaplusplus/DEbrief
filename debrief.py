@@ -34,10 +34,10 @@ def home():
     return send_from_directory('static', 'index.html')
 
 
-@_APP.route('/heatmap')
-def heatmap():
-    '''Renders homepage.'''
-    return send_from_directory('static', 'heatmap.html')
+@_APP.route('/pdb_viewer')
+def pdb_viewer():
+    '''Renders pdb_viewer.'''
+    return send_from_directory('static', 'pdb_viewer.html')
 
 
 @_APP.route('/result/<result_id>')
