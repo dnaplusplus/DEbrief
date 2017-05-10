@@ -16,7 +16,7 @@ import uuid
 from Bio import SeqIO
 from flask import Flask, send_from_directory
 
-from synbiochem.utils import sequence_utils
+from synbiochem.utils import seq_utils
 
 
 # Configuration:
@@ -54,7 +54,7 @@ def _get_uniprot_data(entry, res):
     '''Gets Uniprot data (sequence and secondary structure).'''
     fields = ['sequence', 'database(PDB)', 'feature(BETA STRAND)',
               'feature(HELIX)', 'feature(TURN)']
-    uniprot_data = sequence_utils.get_uniprot_values([entry], fields)
+    uniprot_data = seq_utils.get_uniprot_values([entry], fields)
     res.update(uniprot_data[entry])
 
     res['Cross-reference (PDB)'] = [

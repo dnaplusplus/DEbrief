@@ -7,11 +7,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-from matplotlib import pyplot
-from scipy.cluster.hierarchy import dendrogram, linkage
 import random
 
-from synbiochem.utils import sequence_utils
+from matplotlib import pyplot
+from scipy.cluster.hierarchy import dendrogram, linkage
+from synbiochem.utils import seq_utils
 
 
 def _get_sequence_data(num, length):
@@ -19,12 +19,12 @@ def _get_sequence_data(num, length):
     data = []
     labels = []
 
-    parent_seq = sequence_utils.get_random_aa(length)
+    parent_seq = seq_utils.get_random_aa(length)
 
     for _ in range(num):
         seq = _mutate(parent_seq)
         val = 0.1 + (random.random() * 0.8)
-        data.append(sequence_utils.get_aa_props(seq)[0] + [val])
+        data.append(seq_utils.get_aa_props(seq)[0] + [val])
         labels.append(seq + ',' + '{0:.2f}'.format(val))
 
     return data, labels
@@ -36,7 +36,7 @@ def _mutate(seq, max_mutations=3):
 
     for _ in range(random.randint(0, max_mutations)):
         seq_lst[random.randint(0, len(seq_lst) - 1)] = \
-            random.choice(sequence_utils.AA_PROPS.keys())
+            random.choice(seq_utils.AA_PROPS.keys())
 
     return ''.join(seq_lst)
 
