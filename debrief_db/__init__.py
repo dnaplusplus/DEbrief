@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+from collections import defaultdict
 import re
 import sys
 
@@ -29,10 +30,11 @@ class DEBriefDBClient(object):
 
     def get_mutations(self):
         '''Get mutation data.'''
-        mutations = {}
+        mutations = defaultdict(dict)
 
         for row in self.__values[1:]:
-            mutations[row[4]] = _parse_mutation(row[4])
+            mutations[row[4]]['mutations'] = _parse_mutation(row[4])
+            mutations[row[4]]['active'] = row[6] == 'TRUE'
 
         return mutations
 

@@ -1,224 +1,57 @@
-<!doctype html>
-<head>
-	<title>DEbrief</title>
-	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-	<link rel="stylesheet" href="static/style.css">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-	<script src="static/bio-pv.min.js"></script>
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="static/style.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="static/bio-pv.min.js"></script>
+<body>
+	<div data-ng-app="pdbViewerApp" data-ng-controller="pdbViewerCtrl" data-ng-init="pdb={id:'2VVM',residues:[1,5]}">
+		<pdb-viewer></pdb-viewer>
+	</div>
+
 	<script>
-		$(document).ready(function()
-		{
-			// Hold PDB data:
-			var pdbData = null;
-			var pdbIndex = 0;
-			
-			// Initialise structure viewer:
-			var options = {
-				width: 'auto',
-				height: 'auto',
-				antialias: true,
-				quality: 'medium'
-			};
+		var app = angular.module("pdbViewerApp", []);
 
-			var viewer = pv.Viewer(document.getElementById("structure-viewer"), options);
-			var mol = null;
-			var geom = null;
-			var selectedAtoms = [];
-			
-			viewer.fitParent();
-			
-			window.onresize = function(event)
-			{
-				viewer.fitParent();
-			}
-			
-			// Form submission:
-			$("#search").submit(function()
-			{
-				event.preventDefault();
-				$("#sequence-viewer").empty();
-				clearStructure();
-				
-				$.get("/result/" + $("#search_term").val(), function(data)
-				{
-					result = JSON.parse(data);
-					
-					if(result["Sequence"].length > 0)
-					{
-						// Sequence:
-						for(var i = 0, len = result["Sequence"].length; i < len; i++)
-						{
-							$("#sequence-viewer").append("<div class='residue' ng-mouseover='' data-residue='" + i + "' id='res_" + i + "'>" + result["Sequence"][i] + "</div>");
-						}
-						
-						$(".residue").mouseover(function()
-						{
-							highlightResidue($(this).data("residue"))
-						});
-						
-						setSecondaryStructure(result["Beta strand"], "beta-strand");
-						setSecondaryStructure(result["Helix"], "helix");
-						setSecondaryStructure(result["Turn"], "turn");
-					}
-					
-					pdbData = result["Cross-reference (PDB)"];
-					pdbIndex = 0;
-					updateStructure(0);
-				});
-			});
-
-			// Secondary structure:
-			function setSecondaryStructure(secStruct, className)
-			{
-				for(var i = 0; i < secStruct.length; i++)
-				{
-					obj = secStruct[i];
-					
-					for(var j = obj["start"] - 1; j < obj["end"]; j++)
-					{
-						$("#res_" + j).addClass(className);
-					}
-				}
-			}
-
-			// Structure:
-			function clearStructure()
-			{
-				mol = null;
-				geom = null;
-				selectedAtoms = [];
-				viewer.clear();
-				viewer.requestRedraw();
-				setStructureText("&nbsp;");
-			}
-			
-			$("#next").click(function()
-			{
-				updateStructure(1);
-			});
-			
-			$("#previous").click(function()
-			{
-				updateStructure(-1);
-			});
-			
-			function updateStructure(increment)
-			{
-				clearStructure();
-				
-				pdbIndex = pdbIndex + increment;
-				$("#next").prop('disabled', pdbIndex >= pdbData.length - 1);
-				$("#previous").prop('disabled', pdbIndex == 0);
-				
-				if(pdbData.length > 0)
-				{
-					pv.io.fetchPdb('http://files.rcsb.org/download/' + pdbData[pdbIndex]['id'] + '.pdb', function(newMol)
-					{
+		app.controller("pdbViewerCtrl", function($scope, $timeout) {
+			$scope.$watch('pdb.id', function(val) {
+				$timeout(function() {
+					pv.io.fetchPdb('http://files.rcsb.org/download/' + val + '.pdb', function(newMol) {
 						mol = newMol;
-						geom = viewer.cartoon('protein', mol, {color: color.bySS()});
+						geom = viewer.cartoon('protein', mol, {
+							color : color.bySS()
+						});
 						selectedAtoms = [];
 						viewer.autoZoom();
 					});
-				}
-			}
-			
-			function highlightResidue(index)
-			{
-				if(mol != null)
-				{
-					// Revert currently selected atoms:
-					for(var i = 0; i < selectedAtoms.length; i++)
-					{
-						setColorForAtom(selectedAtoms[i].atom, selectedAtoms[i].color);
-					}
-				
-					selectedAtoms = [];
-					
-					// Colour newly selected atoms in each chain:
-					var chains = mol.chains();
-					
-					for(var i = 0; i < chains.length; i++)
-					{
-						var chainName = chains[i].name();
-						var atom = mol.atom(chainName + '.' + index + '.CA');
-						
-						if(atom !== null)
-						{
-							var color = [0,0,0,0];
-							geom.getColorForAtom(atom, color);
-							selectedAtoms.push({atom: atom, color: color});
-							setColorForAtom(atom, 'red');
-							setStructureText(atom.qualifiedName().split(".")[1]);
+				}, 0)
+			});
+		});
+
+		app.directive("pdbViewer", function($timeout) {
+			return {
+				template: '<div id="structure-viewer"></div>',
+				link: function(scope, element) {
+					$timeout(function() {
+						// Initialise structure viewer:
+						var options = {
+							width: 'auto',
+							height: 'auto',
+							antialias: true,
+							quality: 'medium'
+						};
+
+						viewer = pv.Viewer(document.getElementById("structure-viewer"), options);
+						viewer.fitParent();
+
+						window.onresize = function(event) {
+							viewer.fitParent();
 						}
-						else
-						{
-							setStructureText("&nbsp;");
-						}
-					}
-					
-					viewer.requestRedraw();
+					}, 0)
 				}
-			}
-			
-			function setStructureText(name)
-			{
-				document.getElementById("structure-text").innerHTML = name;
-			}
-			
-			function setColorForAtom(atom, color)
-			{
-			    var view = mol.createEmptyView();
-			    view.addAtom(atom);
-			    geom.colorBy(pv.color.uniform(color), view);
-			}
+			};
 		});
 	</script>
-</head>
-<body>
-	<!-- Navigation bar -->
-	<nav class="navbar navbar-default">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="http://www.synbiochem.co.uk">
-					<span><img alt="Brand" src="static/favicon.ico"></span>
-					DEbrief
-				</a>
-			</div>
-			<form id="search" class="navbar-form navbar-left" role="search">
-		        <div class="form-group">
-		          <input id="search_term" type="text" class="form-control" placeholder="Search">
-		        </div>
-		        <button type="submit" class="btn btn-default">Submit</button>
-	      </form>
-		</div>
-	</nav>
-	  
-	<!-- Sequence panel. -->
-	<div class="col-md-6">
-		<div id="sequence-panel" class="panel panel-default">
-	  		<div class="panel-heading">Sequences</div>
-	  		<div id="sequence-viewer" class="result-panel panel-body"></div>
-		</div>
-	</div>
-	
-	<!-- Structure panel. -->
-	<div class="col-md-6">
-		<div id="structure-panel" class="panel panel-default">
-			<div class="panel-heading">Structure</div>
-			<div id="structure-manager" class="result-panel panel-body">
-				<div id="structure-viewer"></div>
-				<div id="structure-text">&nbsp;</div>
-				<div id="structure-controller">
-					<button id="previous" type="button" class="btn btn-default btn-sm" disabled>
-  						<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-					</button>
-					<button id="next" type="button" class="btn btn-default btn-sm" disabled>
-  						<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
 </body>
+</html>
