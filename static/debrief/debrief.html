@@ -2,6 +2,7 @@
 <div class="text-center">
 	<uib-pagination
 		data-ng-model="ctrl.pagination.current"
+		data-ng-change="ctrl.update()"
 		class="pagination-sm"
 		total-items="ctrl.mutationsList.length"
 		max-size="5"
