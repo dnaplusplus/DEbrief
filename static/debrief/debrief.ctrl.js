@@ -4,15 +4,15 @@ debriefApp.controller("debriefCtrl", ["$scope", "$timeout", "DEBriefService", fu
 	self.mutationsList = DEBriefService.mutationsList;
 	self.pagination = {current: 1};
 
+	self.mutations = function() {
+		return DEBriefService.mutationsList[self.pagination.current - 1];
+	}
+	
 	self.update = function() {
 		highlightMutations();
 	}
 
 	pdb = DEBriefService.pdb;
-
-	mutations = function() {
-		return DEBriefService.mutationsList[self.pagination.current - 1];
-	}
 
 	mol = null;
 	currentMutations = [];
@@ -20,7 +20,7 @@ debriefApp.controller("debriefCtrl", ["$scope", "$timeout", "DEBriefService", fu
 	load_pdb = function() {
 		pv.io.fetchPdb("http://files.rcsb.org/download/" + pdb.id + ".pdb", function(newMol) {
 			mol = newMol;
-			geom = viewer.cartoon("protein", mol, {color : color.bySS()});
+			geom = viewer.cartoon("protein", mol, {color: pv.color.uniform("lightgrey")});
 			highlightMutations()
 			viewer.autoZoom();
 		});
@@ -40,15 +40,16 @@ debriefApp.controller("debriefCtrl", ["$scope", "$timeout", "DEBriefService", fu
 
 			for(var i = 0; i < chains.length; i++) {
 				var chainName = chains[i].name();
-
-				for(var j = 0; j < mutations().length; j++ ) {
-					var atom = mol.atom(chainName + "." + mutations()[j] + ".CA");
+				var positions = self.mutations().positions;
+				
+				for(var j = 0; j < positions.length; j++ ) {
+					var atom = mol.atom(chainName + "." + positions[j] + ".CA");
 
 					if(atom !== null) {
 						var color = [0,0,0,0];
 						geom.getColorForAtom(atom, color);
 						currentMutations.push({atom: atom, color: color});
-						setColorForAtom(atom, "red");
+						setColorForAtom(atom, self.mutations().active ? "green" : "red");
 					}
 				}	
 			}
