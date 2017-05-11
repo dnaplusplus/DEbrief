@@ -8,22 +8,27 @@
 	<script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-1.3.3.js"></script>
 	<script src="static/bio-pv.min.js"></script>
 	<script src="static/debrief/debrief.module.js"></script>
-	<script src="static/debrief/debrief.service.js"></script>
 	<script src="static/debrief/debrief.ctrl.js"></script>
 	<script src="static/debrief/debrief.directive.js"></script>
 <body>
-	<!-- Navigation bar -->
-	<nav class="navbar navbar-default">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="http://www.synbiochem.co.uk">
-					<span><img alt="Brand" src="static/favicon.ico"></span>
-					DEBrief
-				</a>
-			</div>
-		</div>
-	</nav>
 	<div data-ng-app="debriefApp" data-ng-controller="debriefCtrl as ctrl">
+		<!-- Navigation bar -->
+		<nav class="navbar navbar-default">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="http://www.synbiochem.co.uk">
+						<span><img alt="Brand" src="static/favicon.ico"></span>
+						DEBrief
+					</a>
+				</div>
+				<form class="navbar-form navbar-left" role="search">
+			        <div class="form-group">
+			        	<input data-ng-model="ctrl.project_id" type="text" class="form-control">
+			        </div>
+			        <button type="submit" class="btn btn-default" data-ng-click="ctrl.submit()">Submit</button>
+				</form>
+			</div>
+		</nav>
 		<debrief-viewer></debrief-viewer>
 	</div>
 </body>

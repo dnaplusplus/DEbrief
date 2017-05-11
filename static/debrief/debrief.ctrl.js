@@ -1,24 +1,30 @@
-debriefApp.controller("debriefCtrl", ["$scope", "$timeout", "DEBriefService", function($scope, $timeout, DEBriefService) {
+debriefApp.controller("debriefCtrl", ["$http", "$log", "$scope", "$timeout", function($http, $log, $scope, $timeout) {
 	var self = this;
-
-	self.mutationsList = DEBriefService.mutationsList;
+	
+	self.project_id = "MAO-N";
 	self.pagination = {current: 1};
-
-	self.mutations = function() {
-		return DEBriefService.mutationsList[self.pagination.current - 1];
+	self.data = {'pdb': {'id': null}, 'mutations': []};
+	
+	self.submit = function() {
+		$http.get("data/" + self.project_id).then(
+			function(resp) {
+				self.data = resp.data;
+				load_pdb();
+			},
+			function(errResp) {
+				$log.error(errResp.data.message);
+			});
 	}
 	
 	self.update = function() {
 		highlightMutations();
 	}
 
-	pdb = DEBriefService.pdb;
-
 	mol = null;
 	currentMutations = [];
 
 	load_pdb = function() {
-		pv.io.fetchPdb("http://files.rcsb.org/download/" + pdb.id + ".pdb", function(newMol) {
+		pv.io.fetchPdb("http://files.rcsb.org/download/" + self.data.pdb.id + ".pdb", function(newMol) {
 			mol = newMol;
 			geom = viewer.cartoon("protein", mol, {color: pv.color.uniform("lightgrey")});
 			highlightMutations()
@@ -27,38 +33,39 @@ debriefApp.controller("debriefCtrl", ["$scope", "$timeout", "DEBriefService", fu
 	}
 
 	highlightMutations = function() {
-		if(mol) {
-			// Revert currently selected atoms:
-			for(var i = 0; i < currentMutations.length; i++) {
-				setColorForAtom(currentMutations[i].atom, currentMutations[i].color);
-			}
-
-			currentMutations = [];
-
-			// Colour newly selected atoms in each chain:
-			var chains = mol.chains();
-
-			for(var i = 0; i < chains.length; i++) {
-				var chainName = chains[i].name();
-				var positions = self.mutations().positions;
-				
-				for(var j = 0; j < positions.length; j++ ) {
-					var atom = mol.atom(chainName + "." + positions[j] + ".CA");
-
-					if(atom !== null) {
-						var color = [0,0,0,0];
-						geom.getColorForAtom(atom, color);
-						currentMutations.push({atom: atom, color: color});
-						
-						var color = self.mutations().active ? "green" : "red"
-						setColorForAtom(atom, color);
-						labelAtom(atom, self.mutations().name, color);
-					}
-				}	
-			}
-
-			viewer.requestRedraw();
+		// Selected mutations:
+		mutations = self.data.mutations[self.pagination.current - 1];
+		
+		// Revert currently selected atoms:
+		for(var i = 0; i < currentMutations.length; i++) {
+			setColorForAtom(currentMutations[i].atom, currentMutations[i].color);
 		}
+
+		currentMutations = [];
+
+		// Colour newly selected atoms in each chain:
+		var chains = mol.chains();
+
+		for(var i = 0; i < chains.length; i++) {
+			var chainName = chains[i].name();
+			var positions = mutations.positions;
+			
+			for(var j = 0; j < positions.length; j++ ) {
+				var atom = mol.atom(chainName + "." + positions[j] + ".CA");
+
+				if(atom !== null) {
+					var color = [0,0,0,0];
+					geom.getColorForAtom(atom, color);
+					currentMutations.push({atom: atom, color: color});
+					
+					var color = mutations.active ? "green" : "red"
+					setColorForAtom(atom, color);
+					labelAtom(atom, positions[j].join(""), color);
+				}
+			}	
+		}
+
+		viewer.requestRedraw();
 	}
 	
 	labelAtom = function(atom, label, color) {
@@ -74,10 +81,4 @@ debriefApp.controller("debriefCtrl", ["$scope", "$timeout", "DEBriefService", fu
 		view.addAtom(atom);
 		geom.colorBy(pv.color.uniform(color), view);
 	}
-
-	$scope.$watch("pdb.id", function(val) {
-		$timeout(function() {
-			load_pdb();
-		}, 0)
-	});
 }]);

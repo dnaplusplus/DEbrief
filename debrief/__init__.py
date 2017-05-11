@@ -42,25 +42,15 @@ def pdb_viewer():
     return APP.send_static_file('pdb_viewer.html')
 
 
-@APP.route('/pdb_id/<project_id>')
-def get_pdb_id(project_id):
-    '''Gets a pdb id from a project id.'''
+@APP.route('/data/<project_id>')
+def get_data(project_id):
+    '''Gets a pdb id and mutations from a project id.'''
     sheet_id = '1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw'
     client = DEBriefDBClient(sheet_id, project_id, 'A:O')
+    result = {'pdb': {'id': client.get_pdb_id()},
+              'mutations': client.get_mutations().values()}
 
-    return Response(json.dumps({'id': client.get_pdb_id()},
-                               indent=3, sort_keys=True),
-                    mimetype='application/json')
-
-
-@APP.route('/mutations/<project_id>')
-def get_mutations(project_id):
-    '''Gets a pdb id from a project id.'''
-    sheet_id = '1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw'
-    client = DEBriefDBClient(sheet_id, project_id, 'A:O')
-
-    return Response(json.dumps(client.get_mutations().values(),
-                               indent=3, sort_keys=True),
+    return Response(json.dumps(result, indent=3, sort_keys=True),
                     mimetype='application/json')
 
 

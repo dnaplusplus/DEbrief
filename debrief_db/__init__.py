@@ -35,7 +35,7 @@ class DEBriefDBClient(object):
         for row in self.__values[2:]:
             if len(row[4]):
                 mutations[row[4]]['name'] = row[4]
-                mutations[row[4]]['mutations'] = _parse_mutation(row[4])
+                mutations[row[4]]['positions'] = _parse_mutation(row[4])
                 mutations[row[4]]['active'] = row[6] == 'TRUE'
 
         return mutations

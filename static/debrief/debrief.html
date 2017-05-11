@@ -1,10 +1,10 @@
 <div id="pdb-viewer"></div>
-<div class="text-center">
+<div class="text-center" data-ng-show="ctrl.data.mutations.length > 1">
 	<uib-pagination
 		data-ng-model="ctrl.pagination.current"
 		data-ng-change="ctrl.update()"
 		class="pagination-sm"
-		total-items="ctrl.mutationsList.length"
+		total-items="ctrl.data.mutations.length"
 		max-size="5"
 		items-per-page="1">
 	</uib-pagination>
