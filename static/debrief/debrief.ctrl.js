@@ -51,7 +51,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$log", "$scope", "$timeout", fun
 			var positions = mutations.positions;
 			
 			for(var j = 0; j < positions.length; j++ ) {
-				var atom = mol.atom(chainName + "." + positions[j] + ".CA");
+				var atom = mol.atom(chainName + "." + positions[j][1] + ".CA");
 
 				if(atom !== null) {
 					var color = [0,0,0,0];
