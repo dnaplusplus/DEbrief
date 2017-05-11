@@ -1,57 +1,27 @@
 <!DOCTYPE html>
 <html>
-<link rel="stylesheet" href="static/style.css">
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-<script
-	src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-<script src="static/bio-pv.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="static/style.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+	<script src="static/bio-pv.min.js"></script>
+	<script src="static/pdb_viewer/pdb_viewer.module.js"></script>
+	<script src="static/pdb_viewer/pdb_viewer.ctrl.js"></script>
+	<script src="static/pdb_viewer/pdb_viewer.directive.js"></script>
 <body>
-	<div data-ng-app="pdbViewerApp" data-ng-controller="pdbViewerCtrl" data-ng-init="pdb={id:'2VVM',residues:[1,5]}">
+	<!-- Navigation bar -->
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="http://www.synbiochem.co.uk">
+					<span><img alt="Brand" src="static/favicon.ico"></span>
+					PDB viewer
+				</a>
+			</div>
+		</div>
+	</nav>
+	<div data-ng-app="pdbViewerApp" data-ng-controller="pdbViewerCtrl">
 		<pdb-viewer></pdb-viewer>
 	</div>
-
-	<script>
-		var app = angular.module("pdbViewerApp", []);
-
-		app.controller("pdbViewerCtrl", function($scope, $timeout) {
-			$scope.$watch('pdb.id', function(val) {
-				$timeout(function() {
-					pv.io.fetchPdb('http://files.rcsb.org/download/' + val + '.pdb', function(newMol) {
-						mol = newMol;
-						geom = viewer.cartoon('protein', mol, {
-							color : color.bySS()
-						});
-						selectedAtoms = [];
-						viewer.autoZoom();
-					});
-				}, 0)
-			});
-		});
-
-		app.directive("pdbViewer", function($timeout) {
-			return {
-				template: '<div id="structure-viewer"></div>',
-				link: function(scope, element) {
-					$timeout(function() {
-						// Initialise structure viewer:
-						var options = {
-							width: 'auto',
-							height: 'auto',
-							antialias: true,
-							quality: 'medium'
-						};
-
-						viewer = pv.Viewer(document.getElementById("structure-viewer"), options);
-						viewer.fitParent();
-
-						window.onresize = function(event) {
-							viewer.fitParent();
-						}
-					}, 0)
-				}
-			};
-		});
-	</script>
 </body>
 </html>
