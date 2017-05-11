@@ -20,9 +20,19 @@
 	background-color: rgb(204,204,204);
 }
 
+#title
+{
+	position: absolute;
+	top: 52px;
+	z-index: 1;
+	padding-right: 15px;
+	padding-left: 15px;
+}
+
 #pdb-viewer
 {
 	position: absolute;
+	z-index: -1;
 	top: 52px;
 	bottom: 0px;
 	width: 100%;
