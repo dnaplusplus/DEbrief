@@ -1,14 +1,14 @@
 debriefApp.directive("debriefViewer", function($timeout) {
 	return {
-		templateUrl: "/static/debrief/debrief.html",
+		template: "<div id='pdb-viewer'></div>",
 		link: function(scope, element) {
 			$timeout(function() {
 				// Initialise structure viewer:
 				var options = {
-						width: 'auto',
-						height: 'auto',
-						antialias: true,
-						quality: 'medium'
+					width: 'auto',
+					height: 'auto',
+					antialias: true,
+					quality: 'medium'
 				};
 
 				document = element[0]
