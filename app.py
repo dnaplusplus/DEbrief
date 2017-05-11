@@ -14,10 +14,8 @@ from debrief import APP
 
 def main(argv):
     '''main method.'''
-    if len(argv) > 0:
-        APP.run(host='0.0.0.0', threaded=True, port=int(argv[0]))
-    else:
-        APP.run(host='0.0.0.0', threaded=True)
+    port = 80 if len(argv) == 0 else int(argv[0])
+    APP.run(host='0.0.0.0', threaded=True, port=port)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
