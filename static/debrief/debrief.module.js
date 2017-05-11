@@ -1,0 +1,1 @@
+var debriefApp = angular.module("debriefApp", ["ui.bootstrap"]);

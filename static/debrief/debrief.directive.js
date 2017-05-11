@@ -1,6 +1,6 @@
-pdbViewerApp.directive("pdbViewer", function($timeout) {
+debriefApp.directive("debriefViewer", function($timeout) {
 	return {
-		template: '<div id="structure-viewer"></div>',
+		templateUrl: "/static/debrief/debrief.html",
 		link: function(scope, element) {
 			$timeout(function() {
 				// Initialise structure viewer:
@@ -12,7 +12,7 @@ pdbViewerApp.directive("pdbViewer", function($timeout) {
 				};
 
 				document = element[0]
-				viewer = pv.Viewer(document.getElementById("structure-viewer"), options);
+				viewer = pv.Viewer(document.getElementById("pdb-viewer"), options);
 				viewer.fitParent();
 
 				window.onresize = function(event) {

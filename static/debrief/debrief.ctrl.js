@@ -1,11 +1,20 @@
-pdbViewerApp.controller("pdbViewerCtrl", function($scope, $timeout) {
-	result = {"pdb": {id:"2VVM", mutations:[[1,5], [134, 345]]}}
-	mol = null;
-	mutationIndex = 0;
-	currentMutations = [];
+debriefApp.controller("debriefCtrl", ["$scope", "$timeout", "DEBriefService", function($scope, $timeout, DEBriefService) {
+	var self = this;
 	
+	self.mutationsList = DEBriefService.mutationsList;
+	self.pagination = {current: 1};
+	
+	pdb = DEBriefService.pdb;
+	
+	mutations = function() {
+		return DEBriefService.mutationsList[self.pagination.current - 1];
+	}
+	
+	mol = null;
+	currentMutations = [];
+
 	load_pdb = function() {
-		pv.io.fetchPdb("http://files.rcsb.org/download/" + result.pdb.id + ".pdb", function(newMol) {
+		pv.io.fetchPdb("http://files.rcsb.org/download/" + pdb.id + ".pdb", function(newMol) {
 			mol = newMol;
 			geom = viewer.cartoon("protein", mol, {color : color.bySS()});
 			highlightResidues()
@@ -27,8 +36,8 @@ pdbViewerApp.controller("pdbViewerCtrl", function($scope, $timeout) {
 		for(var i = 0; i < chains.length; i++) {
 			var chainName = chains[i].name();
 			
-			for(var j = 0; j < result.pdb.mutations[mutationIndex].length; j++ ) {
-				var atom = mol.atom(chainName + "." + result.pdb.mutations[mutationIndex][j] + ".CA");
+			for(var j = 0; j < mutations().length; j++ ) {
+				var atom = mol.atom(chainName + "." + mutations()[j] + ".CA");
 				
 				if(atom !== null) {
 					var color = [0,0,0,0];
@@ -48,9 +57,9 @@ pdbViewerApp.controller("pdbViewerCtrl", function($scope, $timeout) {
 	    geom.colorBy(pv.color.uniform(color), view);
 	}
 	
-	$scope.$watch("result.pdb.id", function(val) {
+	$scope.$watch("pdb.id", function(val) {
 		$timeout(function() {
 			load_pdb()
 		}, 0)
 	});
-});
+}]);
