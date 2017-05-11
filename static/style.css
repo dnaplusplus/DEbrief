@@ -20,12 +20,9 @@
 	background-color: rgb(204,204,204);
 }
 
-#title
+.title
 {
-	position: absolute;
-	top: 52px;
 	z-index: 1;
-	padding-right: 15px;
 	padding-left: 15px;
 }
 
@@ -36,6 +33,13 @@
 	top: 52px;
 	bottom: 0px;
 	width: 100%;
+}
+
+.footer
+{
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }
 
 #structure-text
