@@ -22,7 +22,10 @@
 
 #structure-viewer
 {
-	height: 600px;
+	position: absolute;
+	top: 52px;
+	bottom: 0px;
+	width: 100%;
 }
 
 #structure-text
