@@ -1,7 +1,8 @@
 pdbViewerApp.controller("pdbViewerCtrl", function($scope, $timeout) {
-	result = {"pdb": {id:"2VVM", residues:[1,5]}}
+	result = {"pdb": {id:"2VVM", mutations:[[1,5], [134, 345]]}}
 	mol = null;
-	selectedAtoms = [];
+	mutationIndex = 0;
+	currentMutations = [];
 	
 	load_pdb = function() {
 		pv.io.fetchPdb("http://files.rcsb.org/download/" + result.pdb.id + ".pdb", function(newMol) {
@@ -12,13 +13,13 @@ pdbViewerApp.controller("pdbViewerCtrl", function($scope, $timeout) {
 		});
 	}
 	
-	highlightResidues = function() {
+	highlightMutations = function() {
 		// Revert currently selected atoms:
-		for(var i = 0; i < selectedAtoms.length; i++) {
-			setColorForAtom(selectedAtoms[i].atom, selectedAtoms[i].color);
+		for(var i = 0; i < currentMutations.length; i++) {
+			setColorForAtom(currentMutations[i].atom, currentMutations[i].color);
 		}
 	
-		selectedAtoms = [];
+		currentMutations = [];
 		
 		// Colour newly selected atoms in each chain:
 		var chains = mol.chains();
@@ -26,13 +27,13 @@ pdbViewerApp.controller("pdbViewerCtrl", function($scope, $timeout) {
 		for(var i = 0; i < chains.length; i++) {
 			var chainName = chains[i].name();
 			
-			for(var j = 0; j < result.pdb.residues.length; j++ ) {
-				var atom = mol.atom(chainName + "." + result.pdb.residues[j] + ".CA");
+			for(var j = 0; j < result.pdb.mutations[mutationIndex].length; j++ ) {
+				var atom = mol.atom(chainName + "." + result.pdb.mutations[mutationIndex][j] + ".CA");
 				
 				if(atom !== null) {
 					var color = [0,0,0,0];
 					geom.getColorForAtom(atom, color);
-					selectedAtoms.push({atom: atom, color: color});
+					currentMutations.push({atom: atom, color: color});
 					setColorForAtom(atom, "red");
 				}
 			}	
