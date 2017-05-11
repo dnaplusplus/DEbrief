@@ -15,9 +15,9 @@ import urllib
 import uuid
 
 from Bio import SeqIO
-from flask import Flask, send_from_directory
+from flask import Flask, Response, send_from_directory
 from synbiochem.utils import seq_utils
-
+from debrief_db import DEBriefDBClient
 
 # Configuration:
 DEBUG = True
@@ -40,6 +40,28 @@ def home():
 def pdb_viewer():
     '''Renders pdb_viewer.'''
     return APP.send_static_file('pdb_viewer.html')
+
+
+@APP.route('/pdb_id/<project_id>')
+def get_pdb_id(project_id):
+    '''Gets a pdb id from a project id.'''
+    sheet_id = '1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw'
+    client = DEBriefDBClient(sheet_id, project_id, 'A:O')
+
+    return Response(json.dumps({'id': client.get_pdb_id()},
+                               indent=3, sort_keys=True),
+                    mimetype='application/json')
+
+
+@APP.route('/mutations/<project_id>')
+def get_mutations(project_id):
+    '''Gets a pdb id from a project id.'''
+    sheet_id = '1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw'
+    client = DEBriefDBClient(sheet_id, project_id, 'A:O')
+
+    return Response(json.dumps(client.get_mutations().values(),
+                               indent=3, sort_keys=True),
+                    mimetype='application/json')
 
 
 @APP.route('/result/<result_id>')

@@ -20,7 +20,7 @@ class DEBriefDBClient(object):
     def __init__(self, sheet_id, tab, sheet_range):
         self.__values = sheets.read_sheet(sheet_id, tab, sheet_range)
 
-    def get_pdb(self):
+    def get_pdb_id(self):
         '''Get pdb data.'''
         for row in self.__values[1:]:
             if len(row[3]):
@@ -32,9 +32,11 @@ class DEBriefDBClient(object):
         '''Get mutation data.'''
         mutations = defaultdict(dict)
 
-        for row in self.__values[1:]:
-            mutations[row[4]]['mutations'] = _parse_mutation(row[4])
-            mutations[row[4]]['active'] = row[6] == 'TRUE'
+        for row in self.__values[2:]:
+            if len(row[4]):
+                mutations[row[4]]['name'] = row[4]
+                mutations[row[4]]['mutations'] = _parse_mutation(row[4])
+                mutations[row[4]]['active'] = row[6] == 'TRUE'
 
         return mutations
 
