@@ -73,7 +73,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$log", "$scope", "$timeout", fun
 	     fontSize: 16, fontColor: color, backgroundAlpha: 0.4
 	    };
 		
-		viewer.label('label', atom.qualifiedName() + " " + label, atom.pos(), options);
+		viewer.label('label', label, atom.pos(), options);
 	}
 
 	setColorForAtom = function(atom, color) {
