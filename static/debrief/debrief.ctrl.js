@@ -70,7 +70,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$log", "$scope", "$timeout", fun
 	
 	labelAtom = function(atom, label, color) {
 		var options = {
-	     fontSize: 16, fontColor: color, backgroundAlpha: 0.4
+	     font: "Helvetica Neue", fontSize: 14, fontColor: color, backgroundAlpha: 0.0
 	    };
 		
 		viewer.label('label', label, atom.pos(), options);
