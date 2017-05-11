@@ -49,13 +49,24 @@ debriefApp.controller("debriefCtrl", ["$scope", "$timeout", "DEBriefService", fu
 						var color = [0,0,0,0];
 						geom.getColorForAtom(atom, color);
 						currentMutations.push({atom: atom, color: color});
-						setColorForAtom(atom, self.mutations().active ? "green" : "red");
+						
+						var color = self.mutations().active ? "green" : "red"
+						setColorForAtom(atom, color);
+						labelAtom(atom, self.mutations().name, color);
 					}
 				}	
 			}
 
 			viewer.requestRedraw();
 		}
+	}
+	
+	labelAtom = function(atom, label, color) {
+		var options = {
+	     fontSize: 16, fontColor: color, backgroundAlpha: 0.4
+	    };
+		
+		viewer.label('label', atom.qualifiedName() + " " + label, atom.pos(), options);
 	}
 
 	setColorForAtom = function(atom, color) {
