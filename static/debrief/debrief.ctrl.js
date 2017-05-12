@@ -21,7 +21,8 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 	}
 
 	mol = null;
-	currentMutations = [];
+	currentHighlights = [];
+	currentLabels = [];
 
 	load_pdb = function() {
 		pv.io.fetchPdb("http://files.rcsb.org/download/" + self.data.pdb.id + ".pdb", function(newMol) {
@@ -42,12 +43,18 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 		// Selected mutations:
 		mutations = self.data.mutations[self.pagination.current - 1];
 		
-		// Revert currently selected atoms:
-		for(var i = 0; i < currentMutations.length; i++) {
-			setColorForAtom(currentMutations[i].atom, currentMutations[i].color);
+		// Revert currently selected residues:
+		for(var i = 0; i < currentHighlights.length; i++) {
+			setColorForAtom(currentHighlights[i].atom, currentHighlights[i].color);
+		}
+		
+		// Revert currently labeled residues:
+		for(var i = 0; i < currentLabels.length; i++) {
+			currentLabels[i]._U = false;
 		}
 
-		currentMutations = [];
+		currentHighlights = [];
+		currentLabels = [];
 
 		// Colour newly selected atoms in each chain:
 		var chains = mol.chains();
@@ -62,7 +69,7 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 				if(atom !== null) {
 					var color = [0,0,0,0];
 					geom.getColorForAtom(atom, color);
-					currentMutations.push({atom: atom, color: color});
+					currentHighlights.push({atom: atom, color: color});
 					
 					var color = mutations.active ? "green" : "red"
 					setColorForAtom(atom, color);
@@ -79,7 +86,7 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 	     font: "Helvetica Neue", fontSize: 14, fontColor: color, backgroundAlpha: 0.0
 	    };
 		
-		viewer.label('label', label, atom.pos(), options);
+		currentLabels.push(viewer.label('label', label, atom.pos(), options));
 	}
 
 	setColorForAtom = function(atom, color) {
