@@ -1,18 +1,21 @@
 debriefApp.controller("debriefCtrl", ["$http", function($http) {
 	var self = this;
 	
-	self.project_id = "MAO-N";
+	self.projectId = "MAO-N";
 	self.pagination = {current: 1};
 	self.data = {'pdb': {'id': null}, 'mutations': []};
 	
 	self.submit = function() {
-		$http.get("data/" + self.project_id).then(
+		self.pagination = {current: 1};
+		self.data = {'pdb': {'id': null}, 'mutations': []};
+		
+		$http.get("data/" + self.projectId).then(
 			function(resp) {
 				self.data = resp.data;
-				load_pdb();
+				loadPdb();
 			},
 			function(errResp) {
-				alert("Unable to fetch data for project " + self.project_id);
+				alert("Unable to fetch data for project " + self.projectId);
 			});
 	}
 	
@@ -24,37 +27,29 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 	currentHighlights = [];
 	currentLabels = [];
 
-	load_pdb = function() {
+	loadPdb = function() {
 		pv.io.fetchPdb("http://files.rcsb.org/download/" + self.data.pdb.id + ".pdb", function(newMol) {
 			mol = newMol;
 			geom = viewer.cartoon("protein", mol, {color: pv.color.uniform("lightgrey")});
-			draw_ligands();
+			drawLigands();
 			highlightMutations()
 			viewer.autoZoom();
 		});
 	}
 	
-	draw_ligands = function() {
+	drawLigands = function() {
 		var ligand = mol.select({rnames : ["FAD"]});
 	    viewer.ballsAndSticks('ligand', ligand);
 	}
 
 	highlightMutations = function() {
+		// Unhighlight previously highlighted mutations:
+		unhighlightMutations();
+		
 		// Selected mutations:
 		mutations = self.data.mutations[self.pagination.current - 1];
 		
-		// Revert currently selected residues:
-		for(var i = 0; i < currentHighlights.length; i++) {
-			setColorForAtom(currentHighlights[i].atom, currentHighlights[i].color);
-		}
 		
-		// Revert currently labeled residues:
-		for(var i = 0; i < currentLabels.length; i++) {
-			currentLabels[i]._U = false;
-		}
-
-		currentHighlights = [];
-		currentLabels = [];
 
 		// Colour newly selected atoms in each chain:
 		var chains = mol.chains();
@@ -79,6 +74,21 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 		}
 
 		viewer.requestRedraw();
+	}
+	
+	unhighlightMutations = function() {
+		// Revert currently selected residues:
+		for(var i = 0; i < currentHighlights.length; i++) {
+			setColorForAtom(currentHighlights[i].atom, currentHighlights[i].color);
+		}
+		
+		// Revert currently labeled residues:
+		for(var i = 0; i < currentLabels.length; i++) {
+			currentLabels[i]._U = false;
+		}
+
+		currentHighlights = [];
+		currentLabels = [];
 	}
 	
 	labelAtom = function(atom, label, color) {

@@ -5,10 +5,10 @@ debriefApp.directive("debriefViewer", function($timeout) {
 			$timeout(function() {
 				// Initialise structure viewer:
 				var options = {
-					width: 'auto',
-					height: 'auto',
+					width: "auto",
+					height: "auto",
 					antialias: true,
-					quality: 'medium'
+					quality: "high"
 				};
 
 				document = element[0]
