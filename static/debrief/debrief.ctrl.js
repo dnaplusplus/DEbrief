@@ -1,4 +1,4 @@
-debriefApp.controller("debriefCtrl", ["$http", "$log", "$scope", "$timeout", function($http, $log, $scope, $timeout) {
+debriefApp.controller("debriefCtrl", ["$http", function($http) {
 	var self = this;
 	
 	self.project_id = "MAO-N";
@@ -12,7 +12,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$log", "$scope", "$timeout", fun
 				load_pdb();
 			},
 			function(errResp) {
-				$log.error(errResp.data.message);
+				alert("Unable to fetch data for project " + self.project_id);
 			});
 	}
 	
@@ -27,9 +27,15 @@ debriefApp.controller("debriefCtrl", ["$http", "$log", "$scope", "$timeout", fun
 		pv.io.fetchPdb("http://files.rcsb.org/download/" + self.data.pdb.id + ".pdb", function(newMol) {
 			mol = newMol;
 			geom = viewer.cartoon("protein", mol, {color: pv.color.uniform("lightgrey")});
+			draw_ligands();
 			highlightMutations()
 			viewer.autoZoom();
 		});
+	}
+	
+	draw_ligands = function() {
+		var ligand = mol.select({rnames : ["FAD"]});
+	    viewer.ballsAndSticks('ligand', ligand);
 	}
 
 	highlightMutations = function() {
