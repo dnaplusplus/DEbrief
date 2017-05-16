@@ -11,6 +11,8 @@ from collections import defaultdict
 import re
 import sys
 
+from synbiochem.utils import seq_utils
+
 from google_sheets import sheets
 
 
@@ -21,8 +23,8 @@ class DEBriefDBClient(object):
         self.__values = sheets.read_sheet(sheet_id, tab, sheet_range)
 
     def get_pdb_id(self):
-        '''Get pdb data.'''
-        for row in self.__values[1:]:
+        '''Get pdb id.'''
+        for row in self.__values[2:]:
             if len(row[3]):
                 return row[2]
 
@@ -39,6 +41,25 @@ class DEBriefDBClient(object):
                 mutations[row[4]]['active'] = row[6] == 'TRUE'
 
         return mutations
+
+    def get_sequences(self):
+        '''Get sequence data.'''
+        sequences = {}
+        name_prefix = ''
+        templ_seq = ''
+
+        for row in self.__values[2:]:
+            if len(row[3]) and row[3] == 'TRUE' and len(row[15]):
+                name_prefix = row[0]
+                templ_seq = row[15]
+                break
+
+        for mutation in self.get_mutations().values():
+            sequences[(name_prefix + mutation['name']).replace(' ', '') +
+                      '|' + name_prefix + '|' + mutation['name']] = \
+                seq_utils.apply_mutations(templ_seq, mutation['positions'])
+
+        return sequences
 
 
 def _parse_mutation(mut_str):
