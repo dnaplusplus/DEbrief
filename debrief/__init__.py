@@ -58,7 +58,7 @@ def get_data(project_id):
 
 @APP.route('/fasta/<project_id>')
 def get_fasta(project_id):
-    '''Gets a pdb id and mutations from a project id.'''
+    '''Gets a fasta file from a project id.'''
     sheet_id = '1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw'
     client = DEBriefDBClient(sheet_id, project_id, 'A:R')
     sequences = client.get_sequences()
@@ -72,6 +72,23 @@ def get_fasta(project_id):
     return response
 
 
+@APP.route('/md-worklist/<project_id>')
+def get_md_worklist(project_id):
+    '''Gets a molecular dynamics worklist from a project id.'''
+    sheet_id = '1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw'
+    client = DEBriefDBClient(sheet_id, project_id, 'A:R')
+    worklist = client.get_md_worklist()
+
+    resp = '\t'.join(['Mutations', 'b factors',
+                      'Cross correlation matrix']) + '\n'
+    resp += '\n'.join('\t'.join(map(str, row)) for row in worklist)
+
+    response = Response(resp, mimetype='application/text')
+    response.headers['Content-Disposition'] = \
+        'attachment; filename=%s_worklist.txt' % project_id
+    return response
+
+
 @APP.route('/result/<result_id>')
 def get_result(result_id):
     '''Gets result from id.'''
@@ -79,8 +96,6 @@ def get_result(result_id):
     result = {}
     result['id'] = result_id
     _get_uniprot_data(entry, result)
-
-    print json.dumps(result, indent=2)
 
     return json.dumps(result)
 

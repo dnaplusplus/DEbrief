@@ -8,6 +8,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 from collections import defaultdict
+from operator import itemgetter
 import re
 import sys
 
@@ -60,6 +61,14 @@ class DEBriefDBClient(object):
                 seq_utils.apply_mutations(templ_seq, mutation['positions'])
 
         return sequences
+
+    def get_md_worklist(self):
+        '''Get molecular dynamics worklist.'''
+        return sorted(list(set([(row[4], row[16], row[17])
+                                if len(row) > 17
+                                else (row[4], '', '')
+                                for row in self.__values[2:]])),
+                      key=itemgetter(0))
 
 
 def _parse_mutation(mut_str):
