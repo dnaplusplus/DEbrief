@@ -38,12 +38,6 @@ def home():
     return APP.send_static_file('index.html')
 
 
-@APP.route('/pdb_viewer')
-def pdb_viewer():
-    '''Renders pdb_viewer.'''
-    return APP.send_static_file('pdb_viewer.html')
-
-
 @APP.route('/data/<project_id>')
 def get_data(project_id):
     '''Gets a pdb id and mutations from a project id.'''
@@ -84,62 +78,3 @@ def get_md_worklist(project_id):
     response.headers['Content-Disposition'] = \
         'attachment; filename=%s_worklist.txt' % project_id
     return response
-
-
-@APP.route('/result/<result_id>')
-def get_result(result_id):
-    '''Gets result from id.'''
-    entry = result_id
-    result = {}
-    result['id'] = result_id
-    _get_uniprot_data(entry, result)
-
-    return json.dumps(result)
-
-
-def _get_uniprot_data(entry, res):
-    '''Gets Uniprot data (sequence and secondary structure).'''
-    fields = ['sequence', 'database(PDB)', 'feature(BETA STRAND)',
-              'feature(HELIX)', 'feature(TURN)']
-    uniprot_data = seq_utils.get_uniprot_values([entry], fields)
-    res.update(uniprot_data[entry])
-
-    res['Cross-reference (PDB)'] = [
-        _get_pdb_data(pdb_id)
-        for pdb_id in res['Cross-reference (PDB)'].split(';')
-        if len(pdb_id) > 0]
-
-    res['Beta strand'] = _get_secondary_data(res['Beta strand'])
-    res['Helix'] = _get_secondary_data(res['Helix'])
-    res['Turn'] = _get_secondary_data(res['Turn'])
-
-
-def _get_pdb_data(pdb_id):
-    '''Returns PDB sequence data.'''
-    url = 'http://www.rcsb.org/pdb/download/downloadFile.do' + \
-        '?fileFormat=FASTA&compression=NO&structureId=' + \
-        pdb_id
-
-    temp_file = tempfile.NamedTemporaryFile()
-    urllib.urlretrieve(url, temp_file.name)
-    fasta_seqs = SeqIO.parse(open(temp_file.name), 'fasta')
-
-    return {'id': pdb_id, 'chains': {fasta.id[len(pdb_id) + 1:len(pdb_id) + 2]:
-                                     str(fasta.seq)
-                                     for fasta in fasta_seqs}}
-
-
-def _get_secondary_data(strng):
-    '''Gets secondary structure data.'''
-    if len(strng) > 0:
-        fields = ['start', 'end', 'pdb']
-        return [dict(zip(fields, _parse_secondary_struct(s)))
-                for s in strng.split('.; ')]
-    return []
-
-
-def _parse_secondary_struct(strng):
-    '''Parses secondary structure string.'''
-    regex = r' (\d*) (\d*).*PDB:(\w*)'
-    terms = re.findall(regex, strng)[0]
-    return int(terms[0]), int(terms[1]), terms[2]
