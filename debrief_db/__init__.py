@@ -31,6 +31,14 @@ class DEBriefDBClient(object):
 
         return None
 
+    def get_activity(self, name):
+        '''Get activity data.'''
+        for row in self.__values[2:]:
+            if row[4] == name:
+                return row[6] == 'TRUE'
+
+        raise ValueError(name)
+
     def get_mutations(self):
         '''Get mutation data.'''
         mutations = defaultdict(dict)
