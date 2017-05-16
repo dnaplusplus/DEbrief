@@ -15,7 +15,7 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 				loadPdb();
 			},
 			function(errResp) {
-				alert("Unable to fetch data for project " + self.projectId) + ".";
+				alert("Unable to fetch data for project " + self.projectId + ".");
 			});
 	}
 	
