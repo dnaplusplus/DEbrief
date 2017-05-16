@@ -64,10 +64,8 @@ class DEBriefDBClient(object):
 
     def get_md_worklist(self):
         '''Get molecular dynamics worklist.'''
-        return sorted(list(set([(row[4], row[16], row[17])
-                                if len(row) > 17
-                                else (row[4], '', '')
-                                for row in self.__values[2:]])),
+        return sorted(list(set([row[4] for row in self.__values[2:]
+                                if len(row) < 17])),
                       key=itemgetter(0))
 
 

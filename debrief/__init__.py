@@ -77,11 +77,8 @@ def get_md_worklist(project_id):
     '''Gets a molecular dynamics worklist from a project id.'''
     sheet_id = '1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw'
     client = DEBriefDBClient(sheet_id, project_id, 'A:R')
-    worklist = client.get_md_worklist()
 
-    resp = '\t'.join(['Mutations', 'b factors',
-                      'Cross correlation matrix']) + '\n'
-    resp += '\n'.join('\t'.join(map(str, row)) for row in worklist)
+    resp = '\n'.join(client.get_md_worklist())
 
     response = Response(resp, mimetype='application/text')
     response.headers['Content-Disposition'] = \
