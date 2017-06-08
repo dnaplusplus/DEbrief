@@ -12,8 +12,6 @@ from operator import itemgetter
 import re
 import sys
 
-from synbiochem.utils import seq_utils
-
 from google_sheets import sheets
 
 
@@ -66,7 +64,7 @@ class DEBriefDBClient(object):
         for mutation in self.get_mutations().values():
             sequences[(name_prefix + mutation['name']).replace(' ', '') +
                       '|' + name_prefix + '|' + mutation['name']] = \
-                seq_utils.apply_mutations(templ_seq, mutation['positions'])
+                _apply_mutations(templ_seq, mutation['positions'])
 
         return sequences
 
@@ -82,6 +80,21 @@ def _parse_mutation(mut_str):
     return [(mut[0], int(mut[1]), mut[2])
             for mut in [re.compile(r'(\d*)').split(mutation)
                         for mutation in mut_str.split()]]
+
+
+def _apply_mutations(seq, mutations):
+    '''Applies mutations to sequence.'''
+    seq = list(seq)
+
+    for mutation in mutations:
+        if mutation[0] != seq[mutation[1] - 1]:
+            raise ValueError('Invalid mutation at position %d.' +
+                             'Amino acid is %s but mutation is of %s.') \
+                % mutation[1], seq[mutation[1] - 1], mutation[0]
+
+        seq[mutation[1] - 1] = mutation[2]
+
+    return ''.join(seq)
 
 
 def main(args):

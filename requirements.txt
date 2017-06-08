@@ -1,3 +1,3 @@
 google-api-python-client
 Flask
-synbiochem-py
+biopython
