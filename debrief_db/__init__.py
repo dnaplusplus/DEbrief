@@ -12,14 +12,12 @@ from operator import itemgetter
 import re
 import sys
 
-from google_sheets import sheets
-
 
 class DEBriefDBClient(object):
     '''Client class for DBBrief-DB.'''
 
-    def __init__(self, sheet_id, tab, sheet_range):
-        self.__values = sheets.read_sheet(sheet_id, tab, sheet_range)
+    def __init__(self, values):
+        self.__values = values
 
     def get_pdb_id(self):
         '''Get pdb id.'''
@@ -95,13 +93,3 @@ def _apply_mutations(seq, mutations):
         seq[mutation[1] - 1] = mutation[2]
 
     return ''.join(seq)
-
-
-def main(args):
-    '''main methods.'''
-    client = DEBriefDBClient(args[0], args[1], args[2])
-    print client.get_mutations()
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])

@@ -8,12 +8,15 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 import sys
+import uuid
 
 from debrief import APP
 
 
 def main(argv):
     '''main method.'''
+    APP.secret_key = str(uuid.uuid4())
+
     if len(argv) > 0:
         APP.run(host='0.0.0.0', threaded=True, port=int(argv[0]))
     else:

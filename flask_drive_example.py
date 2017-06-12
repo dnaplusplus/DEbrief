@@ -7,7 +7,6 @@ Dependency:
 1. pip install flask google-api-python-client
 2. make sure you have client_id.json in this same directory.
 '''
-import os
 import uuid
 from apiclient import discovery
 from oauth2client import client
@@ -22,14 +21,14 @@ APP = flask.Flask(__name__)
 @APP.route('/')
 def index():
     '''Index method.'''
-    credentials = get_credentials()
+    credentials = _get_credentials()
 
     if not credentials:
         return flask.redirect(flask.url_for('oauth2callback'))
     elif credentials.access_token_expired:
         return flask.redirect(flask.url_for('oauth2callback'))
 
-    credentials = get_credentials()
+    credentials = _get_credentials()
     http = credentials.authorize(httplib2.Http())
     url = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
     service = discovery.build(
@@ -69,7 +68,7 @@ def oauth2callback():
     return flask.redirect(flask.url_for('index'))
 
 
-def get_credentials():
+def _get_credentials():
     '''Gets credentials.'''
     store = Storage('credentials.json')
     credentials = store.get()
@@ -81,9 +80,5 @@ def get_credentials():
 
 
 if __name__ == '__main__':
-    if not os.path.exists('client_id.json'):
-        print 'Client secrets file (client_id.json) not found in the app path.'
-        exit()
-
     APP.secret_key = str(uuid.uuid4())
     APP.run(debug=True)
