@@ -7,12 +7,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-import StringIO
 import json
 import sys
 import uuid
 
-from Bio import Seq, SeqIO, SeqRecord
+
 from apiclient import discovery
 from oauth2client import client
 from oauth2client.file import Storage
@@ -29,9 +28,7 @@ def index():
     '''Renders homepage.'''
     credentials = _get_credentials()
 
-    if not credentials:
-        return flask.redirect(flask.url_for('oauth2callback'))
-    elif credentials.access_token_expired:
+    if not credentials or credentials.access_token_expired:
         return flask.redirect(flask.url_for('oauth2callback'))
 
     return APP.send_static_file('index.html')
@@ -74,14 +71,7 @@ def get_data(project_id):
 def get_fasta(project_id):
     '''Gets a fasta file from a project id.'''
     debrief = _get_debrief(project_id)
-    records = [SeqRecord.SeqRecord(Seq.Seq(seq), id=seq_id, name='',
-                                   description='')
-               for seq_id, seq in debrief.get_sequences().iteritems()]
-
-    result = StringIO.StringIO()
-    SeqIO.write(records, result, 'fasta')
-
-    response = flask.Response(result.getvalue(), mimetype='application/text')
+    response = flask.Response(debrief.get_fasta(), mimetype='application/text')
     response.headers['Content-Disposition'] = \
         'attachment; filename=%s.fasta' % project_id
     return response
@@ -111,11 +101,6 @@ def _get_debrief(project_id):
 
 def _get_service():
     '''Gets service.'''
-    credentials = _get_credentials()
-
-    if not credentials or credentials.access_token_expired:
-        return flask.redirect(flask.url_for('oauth2callback'))
-
     credentials = _get_credentials()
     http = credentials.authorize(httplib2.Http())
     url = ('https://sheets.googleapis.com/$discovery/rest?version=v4')

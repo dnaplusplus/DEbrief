@@ -9,7 +9,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 from collections import defaultdict
 from operator import itemgetter
+import StringIO
 import re
+
+from Bio import Seq, SeqIO, SeqRecord
 
 
 class DEBriefDBClient(object):
@@ -45,6 +48,16 @@ class DEBriefDBClient(object):
                 mutations[row[4]]['active'] = row[6] == 'TRUE'
 
         return mutations
+
+    def get_fasta(self):
+        '''Gets fasta of sequence data.'''
+        records = [SeqRecord.SeqRecord(Seq.Seq(seq), id=seq_id, name='',
+                                       description='')
+                   for seq_id, seq in self.get_sequences().iteritems()]
+
+        result = StringIO.StringIO()
+        SeqIO.write(records, result, 'fasta')
+        return result.getvalue()
 
     def get_sequences(self):
         '''Get sequence data.'''
