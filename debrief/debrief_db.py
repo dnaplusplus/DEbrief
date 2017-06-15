@@ -42,18 +42,22 @@ class DEBriefDBClient(object):
         mutations = defaultdict(dict)
 
         for row in self.__values[2:]:
-            if len(row[4]):
-                mutations[row[4]]['name'] = row[4]
+            if len(row[18]):
+                mutations[row[4]]['name'] = row[4].replace(' ', '_')
                 mutations[row[4]]['positions'] = _parse_mutation(row[4])
                 mutations[row[4]]['active'] = row[6] == 'TRUE'
+                mutations[row[4]]['id'] = row[18]
 
         return mutations
 
     def get_fasta(self):
         '''Gets fasta of sequence data.'''
-        records = [SeqRecord.SeqRecord(Seq.Seq(seq), id=seq_id, name='',
-                                       description='')
-                   for seq_id, seq in self.get_sequences().iteritems()]
+        records = [SeqRecord.SeqRecord(Seq.Seq(vals[1]),
+                                       id=seq_id,
+                                       description=vals[0])
+                   for seq_id, vals in self.get_sequences().iteritems()]
+
+        records.sort(key=lambda x: int(x.id))
 
         result = StringIO.StringIO()
         SeqIO.write(records, result, 'fasta')
@@ -61,7 +65,7 @@ class DEBriefDBClient(object):
 
     def get_sequences(self):
         '''Get sequence data.'''
-        sequences = {}
+        seqs = {}
         name_prefix = ''
         templ_seq = ''
 
@@ -72,11 +76,12 @@ class DEBriefDBClient(object):
                 break
 
         for mutation in self.get_mutations().values():
-            sequences[(name_prefix + mutation['name']).replace(' ', '') +
-                      '|' + name_prefix + '|' + mutation['name']] = \
-                _apply_mutations(templ_seq, mutation['positions'])
+            name = name_prefix + '|' + mutation['name']
+            seqs[mutation['id']] = (name,
+                                    _apply_mutations(templ_seq,
+                                                     mutation['positions']))
 
-        return sequences
+        return seqs
 
     def get_md_worklist(self):
         '''Get molecular dynamics worklist.'''

@@ -94,7 +94,7 @@ def _get_debrief(project_id):
     serv = _get_service()
     values = serv.spreadsheets().values().get(
         spreadsheetId='1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw',
-        range=project_id + '!' + 'A:R').execute()
+        range=project_id + '!A:T').execute()
 
     return DEBriefDBClient(values.get('values', []))
 
