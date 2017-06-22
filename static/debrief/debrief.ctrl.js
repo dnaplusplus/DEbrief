@@ -1,21 +1,25 @@
 debriefApp.controller("debriefCtrl", ["$http", function($http) {
 	var self = this;
 	
+	self.busy = false;
 	self.projectId = "MAO-N";
 	self.pagination = {current: 1};
-	self.data = {'pdb': {'id': null}, 'mutations': []};
+	self.data = {"pdb": {"id": null}, "mutations": []};
 	
 	self.submit = function() {
+		self.busy = true;
 		self.pagination = {current: 1};
-		self.data = {'pdb': {'id': null}, 'mutations': []};
+		self.data = {"pdb": {"id": null}, "mutations": []};
 		
 		$http.get("data/" + self.projectId).then(
 			function(resp) {
 				self.data = resp.data;
 				loadPdb();
+				self.busy = false;
 			},
 			function(errResp) {
 				alert("Unable to fetch data for project " + self.projectId + ".");
+				self.busy = false;
 			});
 	}
 	
@@ -39,7 +43,7 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 	
 	drawLigands = function() {
 		var ligand = mol.select({rnames : ["FAD"]});
-	    viewer.ballsAndSticks('ligand', ligand);
+	    viewer.ballsAndSticks("ligand", ligand);
 	}
 
 	highlightMutations = function() {
@@ -96,7 +100,7 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 	     font: "Helvetica Neue", fontSize: 14, fontColor: color, backgroundAlpha: 0.0
 	    };
 		
-		currentLabels.push(viewer.label('label', label, atom.pos(), options));
+		currentLabels.push(viewer.label("label", label, atom.pos(), options));
 	}
 
 	setColorForAtom = function(atom, color) {

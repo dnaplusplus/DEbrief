@@ -1,3 +1,7 @@
+body.wait {
+    cursor: wait;
+}
+
 #title
 {
 	z-index: 1;

@@ -12,34 +12,32 @@
 <script src="static/debrief/debrief.ctrl.js"></script>
 <script src="static/debrief/debrief.directive.js"></script>
 </head>
-<body>
-	<div data-ng-app="debriefApp" data-ng-controller="debriefCtrl as ctrl">
-		<!-- Navigation bar -->
-		<nav class="navbar navbar-default">
-			<div class="container-fluid">
-				<div class="navbar-header">
-					<a class="navbar-brand" href="http://www.synbiochem.co.uk">
-						<span><img alt="Brand" src="static/favicon.ico"></span>
-						DEBrief
-					</a>
-				</div>
-				<form class="navbar-form navbar-left" role="search">
-					<div class="form-group">
-						<input data-ng-model="ctrl.projectId" type="text" class="form-control">
-					</div>
-					<button type="submit" class="btn btn-default" data-ng-click="ctrl.submit()">Submit</button>
-				</form>
+<body data-ng-app="debriefApp" data-ng-controller="debriefCtrl as ctrl" data-ng-class="{wait: ctrl.busy}">
+	<!-- Navigation bar -->
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="http://www.synbiochem.co.uk">
+					<span><img alt="Brand" src="static/favicon.ico"></span>
+					DEBrief
+				</a>
 			</div>
-		</nav>
-		<div id="title">{{ctrl.data.mutations[ctrl.pagination.current - 1].name}}</div>
-		<debrief-viewer></debrief-viewer>
-		<div class="text-center footer"
-			data-ng-show="ctrl.data.mutations.length > 1">
-			<uib-pagination data-ng-model="ctrl.pagination.current"
-				data-ng-change="ctrl.update()" class="pagination-sm"
-				total-items="ctrl.data.mutations.length" max-size="5"
-				items-per-page="1"> </uib-pagination>
+			<form class="navbar-form navbar-left" role="search">
+				<div class="form-group">
+					<input data-ng-model="ctrl.projectId" data-ng-disabled="ctrl.busy" type="text" class="form-control">
+				</div>
+				<button type="submit" class="btn btn-default" data-ng-click="ctrl.submit()" data-ng-disabled="ctrl.busy">Submit</button>
+			</form>
 		</div>
+	</nav>
+	<div id="title">{{ctrl.data.mutations[ctrl.pagination.current - 1].name}}</div>
+	<debrief-viewer></debrief-viewer>
+	<div class="text-center footer"
+		data-ng-show="ctrl.data.mutations.length > 1">
+		<uib-pagination data-ng-model="ctrl.pagination.current"
+			data-ng-change="ctrl.update()" class="pagination-sm"
+			total-items="ctrl.data.mutations.length" max-size="5"
+			items-per-page="1"> </uib-pagination>
 	</div>
 </body>
 </html>
