@@ -5,7 +5,8 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 	self.projectId = "MAO-N";
 	self.pagination = {current: 1};
 	self.data = {"pdb": {"id": null}, "mutations": []};
-
+	self.showBFactors = false;
+	
 	googleLoaded = false;
 
 	google.load("visualization", "1.0", {
@@ -30,19 +31,23 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 					alert("Unable to fetch data for project " + self.projectId + ".");
 					self.busy = false;
 				});
-	}
+	};
+	
+	self.toggleBFactors = function() {
+		self.showBFactors = !self.showBFactors;
+	};
 
 	self.maxBFactor = function() {
 		return self.data.max_b_factor;
-	}
+	};
 
 	self.currMut = function() {
 		return self.data.mutations[self.pagination.current - 1];
-	}
+	};
 
 	self.update = function() {
 		highlightMutations();
-	}
+	};
 
 	mol = null;
 	currentHighlights = [];
@@ -56,12 +61,12 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 			highlightMutations()
 			viewer.autoZoom();
 		});
-	}
+	};
 
 	drawLigands = function() {
 		var ligand = mol.select({rnames : ["FAD"]});
 		viewer.ballsAndSticks("ligand", ligand);
-	}
+	};
 
 	highlightMutations = function() {
 		// Unhighlight previously highlighted mutations:
@@ -93,7 +98,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 		}
 
 		viewer.requestRedraw();
-	}
+	};
 
 	unhighlightMutations = function() {
 		// Revert currently selected residues:
@@ -108,7 +113,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 
 		currentHighlights = [];
 		currentLabels = [];
-	}
+	};
 
 	labelAtom = function(atom, label, color) {
 		var options = {
@@ -116,13 +121,13 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 		};
 
 		currentLabels.push(viewer.label("label", label, atom.pos(), options));
-	}
+	};
 
 	setColorForAtom = function(atom, color) {
 		var view = mol.createEmptyView();
 		view.addAtom(atom);
 		geom.colorBy(pv.color.uniform(color), view);
-	}
+	};
 	
 	$scope.$watch(function() {
 		return self.currMut();
@@ -134,7 +139,9 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 	}, true);
 
 	drawChart = function(b_factors) {
-		if(googleLoaded) {
+		elem = document.getElementById("b-factor-plot");
+		
+		if(googleLoaded && b_factors) {
 			var options = {
 				haxis: {
 					title: "Residue",
@@ -154,14 +161,16 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 			data.addColumn("number", "Residue");
 			data.addColumn("number", "b-factor");
 
-			if(b_factors) {
-				for(var i=0; i < b_factors.length; i++) {
-					data.addRow([i + 1, b_factors[i]]);
-				}
+			
+			for(var i=0; i < b_factors.length; i++) {
+				data.addRow([i + 1, b_factors[i]]);
 			}
 
-			var plot = new google.visualization.LineChart(document.getElementById("b-factor-plot"));
+			var plot = new google.visualization.LineChart(elem);
 			plot.draw(data, options);
 		}
-	}
+		else {
+			elem.innerHTML = "<div id='empty-plot'>No b-factor data available for current mutant.</div>";
+		}
+	};
 }]);

@@ -8,6 +8,10 @@ body.wait {
 	padding-left: 15px;
 }
 
+#empty-plot {
+	height: 200px;
+}
+
 .pdb-viewer
 {
 	position: absolute;
@@ -15,10 +19,6 @@ body.wait {
 	top: 52px;
 	bottom: 0px;
 	width: 100%;
-}
-
-.b-factor .panel-heading {
-	cursor: move;
 }
 
 .footer
