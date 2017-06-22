@@ -23,6 +23,14 @@ debriefApp.controller("debriefCtrl", ["$http", function($http) {
 			});
 	}
 	
+	self.maxBFactor = function() {
+		return self.data.max_b_factor;
+	}
+	
+	self.currMut = function() {
+		return self.data.mutations[self.pagination.current - 1];
+	}
+	
 	self.update = function() {
 		highlightMutations();
 	}
