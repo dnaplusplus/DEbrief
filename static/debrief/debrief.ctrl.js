@@ -5,12 +5,12 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 	self.projectId = "MAO-N";
 	self.pagination = {current: 1};
 	self.data = {"pdb": {"id": null}, "mutations": []};
-	self.showBFactors = false;
+	self.showBFactors = true;
 	
 	googleLoaded = false;
 
-	google.load("visualization", "1.0", {
-		packages: ["corechart"],
+	google.charts.load("current", {
+		"packages": ["line"],
 		callback: function() {
 			googleLoaded = true;
 		}
@@ -143,31 +143,29 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 		
 		if(googleLoaded && b_factors) {
 			var options = {
-				haxis: {
+				hAxis: {
 					title: "Residue",
 				},
-				vaxis: {
+				vAxis: {
 					title: "b-factor",
 					viewWindowMode: "explicit",
-					viewWindow: {
-				        min: 0,
-				        max: self.maxBFactor()
-					}
+		            viewWindow: {
+		            	max: self.maxBFactor()
+		            }
 				},
-				legend: {position: "bottom"}
+				legend: {position: "none"}
 			};
 			
 			var data = new google.visualization.DataTable();
 			data.addColumn("number", "Residue");
 			data.addColumn("number", "b-factor");
 
-			
 			for(var i=0; i < b_factors.length; i++) {
 				data.addRow([i + 1, b_factors[i]]);
 			}
 
-			var plot = new google.visualization.LineChart(elem);
-			plot.draw(data, options);
+			var plot = new google.charts.Line(elem);
+			plot.draw(data, google.charts.Line.convertOptions(options));
 		}
 		else {
 			elem.innerHTML = "<div id='empty-plot'>No b-factor data available for current mutant.</div>";
