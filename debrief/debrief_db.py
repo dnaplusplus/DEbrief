@@ -10,9 +10,22 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 from collections import defaultdict
 from operator import itemgetter
 import StringIO
+import csv
 import re
 
 from Bio import Seq, SeqIO, SeqRecord
+import requests
+
+
+_COLS = {'NAME': 0,
+         'PDB': 2,
+         'TEMPLATE': 3,
+         'MUTATIONS': 4,
+         'ACTIVE': 6,
+         'SEQ': 15,
+         'BATCH': 17,
+         'ID': 18,
+         'B_FACTORS': 20}
 
 
 class DEBriefDBClient(object):
@@ -24,31 +37,47 @@ class DEBriefDBClient(object):
     def get_pdb_id(self):
         '''Get pdb id.'''
         for row in self.__values[2:]:
-            if len(row[3]):
-                return row[2]
+            if len(row[_COLS['TEMPLATE']]):
+                return row[_COLS['PDB']]
 
         return None
 
-    def get_activity(self, name):
+    def get_activity(self, mutation):
         '''Get activity data.'''
         for row in self.__values[2:]:
-            if row[4] == name:
-                return row[6] == 'TRUE'
+            if row[_COLS['MUTATIONS']] == mutation:
+                return row[_COLS['ACTIVE']] == 'TRUE'
 
-        raise ValueError(name)
+        raise ValueError(mutation)
 
-    def get_mutations(self):
-        '''Get mutation data.'''
-        mutations = defaultdict(dict)
+    def get_data(self, seqs=True, b_factors=True):
+        '''Get data.'''
+        muts = defaultdict(dict)
+
+        if seqs:
+            _, templ_seq = self._get_template()
 
         for row in self.__values[2:]:
-            if len(row[18]):
-                mutations[row[4]]['name'] = row[4].replace(' ', '_')
-                mutations[row[4]]['positions'] = _parse_mutation(row[4])
-                mutations[row[4]]['active'] = row[6] == 'TRUE'
-                mutations[row[4]]['id'] = row[18]
+            if len(row[_COLS['ID']]):
+                mut = row[_COLS['MUTATIONS']]
+                muts[mut]['id'] = row[_COLS['ID']]
+                muts[mut]['name'] = mut.replace(' ', '_')
+                muts[mut]['active'] = row[_COLS['ACTIVE']] == 'TRUE'
+                muts[mut]['positions'] = _parse_mutation(mut)
 
-        return mutations
+                if seqs:
+                    muts[mut]['sequence'] = \
+                        _apply_mutations(templ_seq, muts[mut]['positions'])
+
+                if b_factors:
+                    try:
+                        muts[mut]['b-factors'] = \
+                            _get_b_factors(row[_COLS['B_FACTORS']])
+                    except requests.HTTPError, err:
+                        # Assume b-factor data has not yet been archived
+                        print err
+
+        return muts
 
     def get_fasta(self):
         '''Gets fasta of sequence data.'''
@@ -66,29 +95,36 @@ class DEBriefDBClient(object):
     def get_sequences(self):
         '''Get sequence data.'''
         seqs = {}
-        name_prefix = ''
-        templ_seq = ''
+        name_prefix, _ = self._get_template()
 
-        for row in self.__values[2:]:
-            if len(row[3]) and row[3] == 'TRUE' and len(row[15]):
-                name_prefix = row[0]
-                templ_seq = row[15]
-                break
-
-        for mutation in self.get_mutations().values():
+        for mutation in self.get_data(b_factors=False).values():
             name = name_prefix + '|' + mutation['name']
-            seqs[mutation['id']] = (name,
-                                    _apply_mutations(templ_seq,
-                                                     mutation['positions']))
+            seqs[mutation['id']] = (name, mutation['sequence'])
 
         return seqs
 
     def get_md_worklist(self, batch_num):
         '''Get molecular dynamics worklist.'''
-        return sorted([(row[18], row[4]) for row in self.__values[2:]
-                       if len(row) > 18
-                       and row[17] == str(batch_num)],
+        return sorted([(row[_COLS['ID']], row[_COLS['MUTATIONS']])
+                       for row in self.__values[2:]
+                       if len(row) > _COLS['ID']
+                       and row[_COLS['BATCH']] == str(batch_num)],
                       key=itemgetter(0))
+
+    def _get_template(self):
+        '''Get template details.'''
+        name_prefix = ''
+        templ_seq = ''
+
+        for row in self.__values[2:]:
+            if len(row[_COLS['TEMPLATE']]) \
+                    and row[_COLS['TEMPLATE']] == 'TRUE' \
+                    and len(row[_COLS['SEQ']]):
+                name_prefix = row[_COLS['NAME']]
+                templ_seq = row[_COLS['SEQ']]
+                break
+
+        return name_prefix, templ_seq
 
 
 def _parse_mutation(mut_str):
@@ -104,10 +140,29 @@ def _apply_mutations(seq, mutations):
 
     for mutation in mutations:
         if mutation[0] != seq[mutation[1] - 1]:
-            raise ValueError('Invalid mutation at position %d.' +
-                             'Amino acid is %s but mutation is of %s.') \
-                % mutation[1], seq[mutation[1] - 1], mutation[0]
+            err = 'Invalid mutation at position %d. ' % mutation[1] + \
+                'Amino acid is %s ' % seq[mutation[1] - 1] + \
+                'but mutation is of %s.' % mutation[0]
+
+            raise ValueError(err)
 
         seq[mutation[1] - 1] = mutation[2]
 
     return ''.join(seq)
+
+
+def _get_b_factors(url):
+    '''Gets b-factors.'''
+    b_factors = []
+
+    if url:
+        resp = requests.get(url)
+
+        if resp.status_code is not 200:
+            resp.raise_for_status()
+
+        for row in csv.reader(resp.text.splitlines(),
+                              delimiter='\t'):
+            b_factors.append(float(row[1]))
+
+    return b_factors

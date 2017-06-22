@@ -61,7 +61,7 @@ def get_data(project_id):
     '''Gets a pdb id and mutations from a project id.'''
     debrief = _get_debrief(project_id)
     result = {'pdb': {'id': debrief.get_pdb_id()},
-              'mutations': debrief.get_mutations().values()}
+              'mutations': debrief.get_data().values()}
 
     return flask.Response(json.dumps(result, indent=3, sort_keys=True),
                           mimetype='application/json')
@@ -87,8 +87,19 @@ def get_md_worklist(project_id, batch_num):
 
     response = flask.Response(resp, mimetype='application/text')
     response.headers['Content-Disposition'] = \
-        'attachment; filename=%s_worklist.txt' % project_id
+        'attachment; filename=%s_%s_worklist.txt' % (project_id, batch_num)
     return response
+
+
+@APP.route('/b-factors/<project_id>')
+def get_b_factors(project_id):
+    '''Gets a molecular dynamics b-factors from a project id.'''
+    debrief = _get_debrief(project_id)
+
+    return flask.Response(json.dumps(debrief.get_b_factors(),
+                                     indent=3,
+                                     sort_keys=True),
+                          mimetype='application/json')
 
 
 def _get_debrief(project_id):
@@ -96,7 +107,7 @@ def _get_debrief(project_id):
     serv = _get_service()
     values = serv.spreadsheets().values().get(
         spreadsheetId='1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw',
-        range=project_id + '!A:T').execute()
+        range=project_id + '!A:Z').execute()
 
     return DEBriefDBClient(values.get('values', []))
 
