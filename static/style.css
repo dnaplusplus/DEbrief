@@ -2,19 +2,23 @@ body.wait {
     cursor: wait;
 }
 
-#title
+.title
 {
 	z-index: 1;
 	padding-left: 15px;
 }
 
-#pdb-viewer
+.pdb-viewer
 {
 	position: absolute;
 	z-index: -1;
 	top: 52px;
 	bottom: 0px;
 	width: 100%;
+}
+
+.b-factor .panel-heading {
+	cursor: move;
 }
 
 .footer

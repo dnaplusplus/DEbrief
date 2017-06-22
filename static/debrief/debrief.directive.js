@@ -1,6 +1,6 @@
 debriefApp.directive("debriefViewer", function($timeout) {
 	return {
-		template: "<div id='pdb-viewer'></div>",
+		template: "<div id='pdb-viewer' class='pdb-viewer'></div>",
 		link: function(scope, element) {
 			$timeout(function() {
 				// Initialise structure viewer:

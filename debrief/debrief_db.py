@@ -159,8 +159,6 @@ def _apply_mutations(seq, mutations):
             # Mutation:
             seq[mutation[1] - offset] = mutation[2]
 
-        print mutation[2]
-
     return ''.join(seq)
 
 
