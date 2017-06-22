@@ -99,7 +99,9 @@ class DEBriefDBClient(object):
         seqs = {}
         name_prefix, _ = self._get_template()
 
-        for mutation in self.get_data(b_factors=False).values():
+        muts, _ = self.get_data(b_factors=False)
+
+        for mutation in muts.values():
             name = name_prefix + '|' + mutation['name']
             seqs[mutation['id']] = (name, mutation['sequence'])
 
@@ -139,16 +141,25 @@ def _parse_mutation(mut_str):
 def _apply_mutations(seq, mutations):
     '''Applies mutations to sequence.'''
     seq = list(seq)
+    offset = 1
 
     for mutation in mutations:
-        if mutation[0] != seq[mutation[1] - 1]:
+        if mutation[0] != seq[mutation[1] - offset]:
             err = 'Invalid mutation at position %d. ' % mutation[1] + \
-                'Amino acid is %s ' % seq[mutation[1] - 1] + \
+                'Amino acid is %s ' % seq[mutation[1] - offset] + \
                 'but mutation is of %s.' % mutation[0]
 
             raise ValueError(err)
 
-        seq[mutation[1] - 1] = mutation[2]
+        if mutation[2] == '-':
+            # Deletion:
+            del seq[mutation[1] - offset]
+            offset += 1
+        else:
+            # Mutation:
+            seq[mutation[1] - offset] = mutation[2]
+
+        print mutation[2]
 
     return ''.join(seq)
 
