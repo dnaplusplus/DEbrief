@@ -60,8 +60,10 @@ def oauth2callback():
 def get_data(project_id):
     '''Gets a pdb id and mutations from a project id.'''
     debrief = _get_debrief(project_id)
+    mutations, max_b_factor = debrief.get_data()
     result = {'pdb': {'id': debrief.get_pdb_id()},
-              'mutations': debrief.get_data().values()}
+              'max_b_factor': max_b_factor,
+              'mutations': mutations.values()}
 
     return flask.Response(json.dumps(result, indent=3, sort_keys=True),
                           mimetype='application/json')
@@ -89,17 +91,6 @@ def get_md_worklist(project_id, batch_num):
     response.headers['Content-Disposition'] = \
         'attachment; filename=%s_%s_worklist.txt' % (project_id, batch_num)
     return response
-
-
-@APP.route('/b-factors/<project_id>')
-def get_b_factors(project_id):
-    '''Gets a molecular dynamics b-factors from a project id.'''
-    debrief = _get_debrief(project_id)
-
-    return flask.Response(json.dumps(debrief.get_b_factors(),
-                                     indent=3,
-                                     sort_keys=True),
-                          mimetype='application/json')
 
 
 def _get_debrief(project_id):

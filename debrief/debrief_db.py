@@ -53,6 +53,7 @@ class DEBriefDBClient(object):
     def get_data(self, seqs=True, b_factors=True):
         '''Get data.'''
         muts = defaultdict(dict)
+        max_b_factor = -1
 
         if seqs:
             _, templ_seq = self._get_template()
@@ -71,13 +72,14 @@ class DEBriefDBClient(object):
 
                 if b_factors:
                     try:
-                        muts[mut]['b-factors'] = \
-                            _get_b_factors(row[_COLS['B_FACTORS']])
+                        b_factors = _get_b_factors(row[_COLS['B_FACTORS']])
+                        muts[mut]['b_factors'] = b_factors
+                        max_b_factor = max(max_b_factor, max(b_factors))
                     except requests.HTTPError, err:
                         # Assume b-factor data has not yet been archived
                         print err
 
-        return muts
+        return muts, max_b_factor
 
     def get_fasta(self):
         '''Gets fasta of sequence data.'''
