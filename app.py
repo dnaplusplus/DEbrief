@@ -77,11 +77,13 @@ def get_fasta(project_id):
     return response
 
 
-@APP.route('/md-worklist/<project_id>')
-def get_md_worklist(project_id):
-    '''Gets a molecular dynamics worklist from a project id.'''
+@APP.route('/md-worklist/<project_id>/<batch_num>')
+def get_md_worklist(project_id, batch_num):
+    '''Gets a molecular dynamics worklist from a project id and batch num.'''
     debrief = _get_debrief(project_id)
-    resp = '\n'.join(debrief.get_md_worklist())
+
+    resp = '\n'.join(['\t'.join(vals)
+                      for vals in debrief.get_md_worklist(batch_num)])
 
     response = flask.Response(resp, mimetype='application/text')
     response.headers['Content-Disposition'] = \

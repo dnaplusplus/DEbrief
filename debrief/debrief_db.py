@@ -83,10 +83,11 @@ class DEBriefDBClient(object):
 
         return seqs
 
-    def get_md_worklist(self):
+    def get_md_worklist(self, batch_num):
         '''Get molecular dynamics worklist.'''
-        return sorted(list(set([row[4] for row in self.__values[2:]
-                                if len(row) < 17])),
+        return sorted([(row[18], row[4]) for row in self.__values[2:]
+                       if len(row) > 18
+                       and row[17] == str(batch_num)],
                       key=itemgetter(0))
 
 
