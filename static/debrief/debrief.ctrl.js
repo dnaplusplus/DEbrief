@@ -1,4 +1,4 @@
-debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope) {
+debriefApp.controller("debriefCtrl", ["$http", "$window", function($http, $window) {
 	var self = this;
 
 	self.busy = false;
@@ -25,6 +25,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 				function(resp) {
 					self.data = resp.data;
 					loadPdb();
+					drawBFactors();
 					self.busy = false;
 				},
 				function(errResp) {
@@ -47,6 +48,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 
 	self.update = function() {
 		highlightMutations();
+		drawBFactors();
 	};
 
 	mol = null;
@@ -58,7 +60,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 			mol = newMol;
 			geom = viewer.cartoon("protein", mol, {color: pv.color.uniform("lightgrey")});
 			drawLigands();
-			highlightMutations()
+			highlightMutations();
 			viewer.autoZoom();
 		});
 	};
@@ -128,20 +130,11 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 		view.addAtom(atom);
 		geom.colorBy(pv.color.uniform(color), view);
 	};
-	
-	$scope.$watch(function() {
-		return self.currMut();
-	},               
-	function(values) {
-		if(values) {
-			drawChart(values.b_factors);
-		}
-	}, true);
 
-	drawChart = function(b_factors) {
+	drawBFactors = function() {
 		elem = document.getElementById("b-factor-plot");
 		
-		if(googleLoaded && b_factors) {
+		if(googleLoaded && self.currMut() && self.currMut().b_factors) {
 			var options = {
 				hAxis: {
 					title: "Residue",
@@ -160,6 +153,8 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 			data.addColumn("number", "Residue");
 			data.addColumn("number", "b-factor");
 
+			b_factors = self.currMut().b_factors;
+			
 			for(var i=0; i < b_factors.length; i++) {
 				data.addRow([i + 1, b_factors[i]]);
 			}
@@ -171,4 +166,8 @@ debriefApp.controller("debriefCtrl", ["$http", "$scope", function($http, $scope)
 			elem.innerHTML = "<div id='empty-plot'>No b-factor data available for current mutant.</div>";
 		}
 	};
+	
+	angular.element($window).on("resize", function() {
+		drawBFactors();
+	});
 }]);
