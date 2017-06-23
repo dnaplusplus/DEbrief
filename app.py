@@ -100,7 +100,7 @@ def _get_debrief(project_id):
         spreadsheetId='1-dcR5dPaYwtH38HNYqBieOSaqMz-31N8aEdEb3IqRkw',
         range=project_id + '!A:Z').execute()
 
-    return DEBriefDBClient(values.get('values', []))
+    return DEBriefDBClient(project_id, values.get('values', []))
 
 
 def _get_service():

@@ -24,14 +24,14 @@ _COLS = {'NAME': 0,
          'ACTIVE': 6,
          'SEQ': 15,
          'BATCH': 17,
-         'ID': 18,
-         'B_FACTORS': 20}
+         'ID': 18}
 
 
 class DEBriefDBClient(object):
     '''Client class for DBBrief-DB.'''
 
-    def __init__(self, values):
+    def __init__(self, project_id, values):
+        self.__project_id = project_id
         self.__values = values
 
     def get_pdb_id(self):
@@ -56,7 +56,7 @@ class DEBriefDBClient(object):
         max_b_factor = -1
 
         if seqs:
-            _, templ_seq = self._get_template()
+            _, templ_seq = self.__get_template()
 
         for row in self.__values[2:]:
             if len(row[_COLS['ID']]):
@@ -72,7 +72,7 @@ class DEBriefDBClient(object):
 
                 if b_factors:
                     try:
-                        b_factors = _get_b_factors(row[_COLS['B_FACTORS']])
+                        b_factors = self.__get_b_factors(row[_COLS['ID']])
                         muts[mut]['b_factors'] = b_factors
                         max_b_factor = max(max_b_factor, max(b_factors))
                     except requests.HTTPError, err:
@@ -97,7 +97,7 @@ class DEBriefDBClient(object):
     def get_sequences(self):
         '''Get sequence data.'''
         seqs = {}
-        name_prefix, _ = self._get_template()
+        name_prefix, _ = self.__get_template()
 
         muts, _ = self.get_data(b_factors=False)
 
@@ -115,7 +115,7 @@ class DEBriefDBClient(object):
                        and row[_COLS['BATCH']] == str(batch_num)],
                       key=itemgetter(0))
 
-    def _get_template(self):
+    def __get_template(self):
         '''Get template details.'''
         name_prefix = ''
         templ_seq = ''
@@ -129,6 +129,25 @@ class DEBriefDBClient(object):
                 break
 
         return name_prefix, templ_seq
+
+    def __get_b_factors(self, seq_id):
+        '''Gets b-factors.'''
+        b_factors = []
+
+        url = 'https://storage.googleapis.com/debrief/%s/b-factors/%s.txt' % (
+            self.__project_id, seq_id)
+
+        if url:
+            resp = requests.get(url)
+
+            if resp.status_code is not 200:
+                resp.raise_for_status()
+
+            for row in csv.reader(resp.text.splitlines(),
+                                  delimiter='\t'):
+                b_factors.append(float(row[1]))
+
+        return b_factors
 
 
 def _parse_mutation(mut_str):
@@ -160,20 +179,3 @@ def _apply_mutations(seq, mutations):
             seq[mutation[1] - offset] = mutation[2]
 
     return ''.join(seq)
-
-
-def _get_b_factors(url):
-    '''Gets b-factors.'''
-    b_factors = []
-
-    if url:
-        resp = requests.get(url)
-
-        if resp.status_code is not 200:
-            resp.raise_for_status()
-
-        for row in csv.reader(resp.text.splitlines(),
-                              delimiter='\t'):
-            b_factors.append(float(row[1]))
-
-    return b_factors
