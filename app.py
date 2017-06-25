@@ -11,7 +11,6 @@ import json
 import sys
 import uuid
 
-
 from apiclient import discovery
 from oauth2client import client
 from oauth2client.file import Storage
@@ -19,6 +18,7 @@ import flask
 import httplib2
 
 from debrief.debrief_db import DEBriefDBClient
+
 
 APP = flask.Flask(__name__)
 
