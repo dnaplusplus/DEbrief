@@ -11,9 +11,9 @@ from collections import defaultdict
 from operator import itemgetter
 import StringIO
 import csv
-import re
 
 from Bio import Seq, SeqIO, SeqRecord
+from synbiochem.utils import seq_utils
 import requests
 
 
@@ -64,11 +64,12 @@ class DEBriefDBClient(object):
                 muts[mut]['id'] = row[_COLS['ID']]
                 muts[mut]['name'] = mut.replace(' ', '_')
                 muts[mut]['active'] = row[_COLS['ACTIVE']] == 'TRUE'
-                muts[mut]['positions'] = _parse_mutation(mut)
+                muts[mut]['positions'] = seq_utils.parse_mutation(mut)
 
                 if seqs:
                     muts[mut]['sequence'] = \
-                        _apply_mutations(templ_seq, muts[mut]['positions'])
+                        seq_utils.apply_mutations(templ_seq,
+                                                  muts[mut]['positions'])
 
                 if b_factors:
                     try:
@@ -148,34 +149,3 @@ class DEBriefDBClient(object):
                 b_factors.append(float(row[1]))
 
         return b_factors
-
-
-def _parse_mutation(mut_str):
-    '''Parse mutation string.'''
-    return [(mut[0], int(mut[1]), mut[2])
-            for mut in [re.compile(r'(\d*)').split(mutation)
-                        for mutation in mut_str.split()]]
-
-
-def _apply_mutations(seq, mutations):
-    '''Applies mutations to sequence.'''
-    seq = list(seq)
-    offset = 1
-
-    for mutation in mutations:
-        if mutation[0] != seq[mutation[1] - offset]:
-            err = 'Invalid mutation at position %d. ' % mutation[1] + \
-                'Amino acid is %s ' % seq[mutation[1] - offset] + \
-                'but mutation is of %s.' % mutation[0]
-
-            raise ValueError(err)
-
-        if mutation[2] == '-':
-            # Deletion:
-            del seq[mutation[1] - offset]
-            offset += 1
-        else:
-            # Mutation:
-            seq[mutation[1] - offset] = mutation[2]
-
-    return ''.join(seq)
