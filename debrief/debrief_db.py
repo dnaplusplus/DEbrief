@@ -37,7 +37,7 @@ class DEBriefDBClient(object):
     def get_pdb_id(self):
         '''Get pdb id.'''
         for row in self.__values[2:]:
-            if len(row[_COLS['TEMPLATE']]):
+            if row[_COLS['TEMPLATE']]:
                 return row[_COLS['PDB']]
 
         return None
@@ -59,7 +59,7 @@ class DEBriefDBClient(object):
             _, templ_seq = self.__get_template()
 
         for row in self.__values[2:]:
-            if len(row[_COLS['ID']]):
+            if row[_COLS['ID']]:
                 mut = row[_COLS['MUTATIONS']]
                 muts[mut]['id'] = row[_COLS['ID']]
                 muts[mut]['name'] = mut.replace(' ', '_')
@@ -122,9 +122,9 @@ class DEBriefDBClient(object):
         templ_seq = ''
 
         for row in self.__values[2:]:
-            if len(row[_COLS['TEMPLATE']]) \
+            if row[_COLS['TEMPLATE']] \
                     and row[_COLS['TEMPLATE']] == 'TRUE' \
-                    and len(row[_COLS['SEQ']]):
+                    and row[_COLS['SEQ']]:
                 name_prefix = row[_COLS['NAME']]
                 templ_seq = row[_COLS['SEQ']]
                 break
@@ -141,7 +141,7 @@ class DEBriefDBClient(object):
         if url:
             resp = requests.get(url)
 
-            if resp.status_code is not 200:
+            if resp.status_code != 200:
                 resp.raise_for_status()
 
             for row in csv.reader(resp.text.splitlines(),
