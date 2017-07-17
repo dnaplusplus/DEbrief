@@ -26,11 +26,7 @@ APP = flask.Flask(__name__)
 @APP.route('/')
 def index():
     '''Renders homepage.'''
-    credentials = _get_credentials()
-
-    if not credentials or credentials.access_token_expired:
-        return flask.redirect(flask.url_for('oauth2callback'))
-
+    _update_credentials()
     return APP.send_static_file('index.html')
 
 
@@ -59,6 +55,7 @@ def oauth2callback():
 @APP.route('/data/<project_id>')
 def get_data(project_id):
     '''Gets a pdb id and mutations from a project id.'''
+    _update_credentials()
     debrief = _get_debrief(project_id)
     mutations, max_b_factor, max_active_site_rmsd = debrief.get_data()
     result = {'pdb': {'id': debrief.get_pdb_id()},
@@ -73,6 +70,7 @@ def get_data(project_id):
 @APP.route('/fasta/<project_id>')
 def get_fasta(project_id):
     '''Gets a fasta file from a project id.'''
+    _update_credentials()
     debrief = _get_debrief(project_id)
     response = flask.Response(debrief.get_fasta(), mimetype='application/text')
     response.headers['Content-Disposition'] = \
@@ -83,6 +81,7 @@ def get_fasta(project_id):
 @APP.route('/md-worklist/<project_id>/<batch_num>')
 def get_md_worklist(project_id, batch_num):
     '''Gets a molecular dynamics worklist from a project id and batch num.'''
+    _update_credentials()
     debrief = _get_debrief(project_id)
 
     resp = '\n'.join(['\t'.join(vals)
@@ -110,6 +109,14 @@ def _get_service():
     http = credentials.authorize(httplib2.Http())
     url = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
     return discovery.build('sheets', 'v4', http=http, discoveryServiceUrl=url)
+
+
+def _update_credentials():
+    '''Updates credentials.'''
+    credentials = _get_credentials()
+
+    if not credentials or credentials.access_token_expired:
+        return flask.redirect(flask.url_for('oauth2callback'))
 
 
 def _get_credentials():
