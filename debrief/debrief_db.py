@@ -11,11 +11,14 @@ from collections import defaultdict
 from operator import itemgetter
 import StringIO
 import csv
+import math
 
 from Bio import Seq, SeqIO, SeqRecord
 from synbiochem.utils import seq_utils
 import requests
 
+
+_URL = 'https://storage.googleapis.com/debrief'
 
 _COLS = {'NAME': 0,
          'PDB': 2,
@@ -50,10 +53,11 @@ class DEBriefDBClient(object):
 
         raise ValueError(mutation)
 
-    def get_data(self, seqs=True, b_factors=True):
+    def get_data(self, seqs=True, b_factors=True, active_site_rmsd=True):
         '''Get data.'''
         muts = defaultdict(dict)
         max_b_factor = -1
+        max_active_site_rmsd = -1
 
         if seqs:
             _, templ_seq = self.__get_template()
@@ -74,13 +78,25 @@ class DEBriefDBClient(object):
                 if b_factors:
                     try:
                         b_factors = self.__get_b_factors(row[_COLS['ID']])
-                        muts[mut]['b_factors'] = b_factors
+                        muts[mut]['b_factors'] = _strip_nan(b_factors)
                         max_b_factor = max(max_b_factor, max(b_factors))
                     except requests.HTTPError, err:
                         # Assume b-factor data has not yet been archived
                         print err
 
-        return muts, max_b_factor
+                if active_site_rmsd:
+                    try:
+                        active_site_rmsd = \
+                            self.__get_active_site_rmsd(row[_COLS['ID']])
+                        muts[mut]['active_site_rmsd'] = \
+                            _strip_nan(active_site_rmsd)
+                        max_active_site_rmsd = \
+                            max(max_active_site_rmsd, max(active_site_rmsd))
+                    except requests.HTTPError, err:
+                        # Assume active site data has not yet been archived
+                        print err
+
+        return muts, max_b_factor, max_active_site_rmsd
 
     def get_fasta(self):
         '''Gets fasta of sequence data.'''
@@ -100,7 +116,7 @@ class DEBriefDBClient(object):
         seqs = {}
         name_prefix, _ = self.__get_template()
 
-        muts, _ = self.get_data(b_factors=False)
+        muts, _, _ = self.get_data(b_factors=False)
 
         for mutation in muts.values():
             name = name_prefix + '|' + mutation['name']
@@ -135,8 +151,7 @@ class DEBriefDBClient(object):
         '''Gets b-factors.'''
         b_factors = []
 
-        url = 'https://storage.googleapis.com/debrief/%s/b-factors/%s.txt' % (
-            self.__project_id, seq_id)
+        url = '%s/%s/b-factors/%s.txt' % (_URL, self.__project_id, seq_id)
 
         if url:
             resp = requests.get(url)
@@ -149,3 +164,26 @@ class DEBriefDBClient(object):
                 b_factors.append(float(row[1]))
 
         return b_factors
+
+    def __get_active_site_rmsd(self, seq_id):
+        '''Gets active_site_rmsd.'''
+        active_site_rmsd = []
+
+        url = '%s/%s/active_site/%s.pdb' % (_URL, self.__project_id, seq_id)
+
+        if url:
+            resp = requests.get(url)
+
+            if resp.status_code != 200:
+                resp.raise_for_status()
+
+            for line in resp.text.splitlines():
+                if line.startswith('REMARK'):
+                    active_site_rmsd.append(float(line.split()[1]))
+
+        return active_site_rmsd
+
+
+def _strip_nan(lst):
+    '''Strip NaN from iterable.'''
+    return [-1 if math.isnan(val) else val for val in lst]

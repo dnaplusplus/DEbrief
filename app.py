@@ -60,9 +60,10 @@ def oauth2callback():
 def get_data(project_id):
     '''Gets a pdb id and mutations from a project id.'''
     debrief = _get_debrief(project_id)
-    mutations, max_b_factor = debrief.get_data()
+    mutations, max_b_factor, max_active_site_rmsd = debrief.get_data()
     result = {'pdb': {'id': debrief.get_pdb_id()},
               'max_b_factor': max_b_factor,
+              'max_active_site_rmsd': max_active_site_rmsd,
               'mutations': mutations.values()}
 
     return flask.Response(json.dumps(result, indent=3, sort_keys=True),
