@@ -64,7 +64,7 @@ def get_data(project_id):
     result = {'pdb': {'id': debrief.get_pdb_id()},
               'max_b_factor': max_b_factor,
               'max_active_site_rmsd': max_active_site_rmsd,
-              'mutations': mutations.values()}
+              'mutations': _format_mutations(mutations.values())}
 
     return flask.Response(json.dumps(result, indent=3, sort_keys=True),
                           mimetype='application/json')
@@ -121,6 +121,17 @@ def _get_credentials():
         return None
 
     return credentials
+
+
+def _format_mutations(mutations):
+    '''Reformats mutations from Mutation to string.'''
+    for mutation in mutations:
+        mutation['positions'] = [[mut.get_wt_res(),
+                                  mut.get_pos(),
+                                  mut.get_mut_res()]
+                                 for mut in mutation['positions']]
+
+    return mutations
 
 
 def main(argv):

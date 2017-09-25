@@ -14,7 +14,7 @@ import csv
 import math
 
 from Bio import Seq, SeqIO, SeqRecord
-from synbiochem.utils import seq_utils
+from synbiochem.utils import mut_utils
 import requests
 
 
@@ -68,11 +68,11 @@ class DEBriefDBClient(object):
                 muts[mut]['id'] = row[_COLS['ID']]
                 muts[mut]['name'] = mut.replace(' ', '_')
                 muts[mut]['active'] = row[_COLS['ACTIVE']] == 'TRUE'
-                muts[mut]['positions'] = seq_utils.parse_mutation(mut)
+                muts[mut]['positions'] = mut_utils.parse_mut_str(mut)
 
                 if seqs:
                     muts[mut]['sequence'] = \
-                        seq_utils.apply_mutations(templ_seq,
+                        mut_utils.apply_mutations(templ_seq,
                                                   muts[mut]['positions'])
 
                 if b_factors:
