@@ -31,31 +31,12 @@
 				</div>
 				<button class="btn btn-default" data-ng-click="ctrl.submit()" data-ng-disabled="ctrl.busy">Submit</button>
 			</form>
-			<!--
-			<div class="collapse navbar-collapse">
-	   			<div class="navbar-form navbar-right">
-	   				<button class="btn btn-default active" data-ng-click="ctrl.toggleBFactors()" data-toggle="button" aria-pressed="false">b-factors</button>
-				</div>
-			</div>
-			-->
 		</div>
 	</nav>
 
 	<div class="col-md-8">
 		<div class="title">{{ctrl.currMut().name}}</div>
 	</div>
-	<!--
-	<div class="col-md-4" data-ng-show="ctrl.showBFactors">
-		<div class="b-factor">
-			<div class="panel panel-default">
-				<div class="panel-heading">b-factors</div>
-				<div class="panel-body" id="b-factor-plot">
-					<div id="empty-plot">No b-factor data available for current mutant.</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	-->
 
 	<debrief-viewer></debrief-viewer>
 

@@ -5,7 +5,6 @@ debriefApp.controller("debriefCtrl", ["$http", "$window", function($http, $windo
 	self.projectId = "KSI";
 	self.pagination = {current: 1};
 	self.data = {"pdb": {"id": null}, "mutations": []};
-	self.showBFactors = false;
 	
 	googleLoaded = false;
 
@@ -25,21 +24,12 @@ debriefApp.controller("debriefCtrl", ["$http", "$window", function($http, $windo
 				function(resp) {
 					self.data = resp.data;
 					loadPdb();
-					drawBFactors();
 					self.busy = false;
 				},
 				function(errResp) {
 					alert("Unable to fetch data for project " + self.projectId + ".");
 					self.busy = false;
 				});
-	};
-	
-	self.toggleBFactors = function() {
-		self.showBFactors = !self.showBFactors;
-	};
-
-	self.maxBFactor = function() {
-		return self.data.max_b_factor;
 	};
 
 	self.currMut = function() {
@@ -48,7 +38,6 @@ debriefApp.controller("debriefCtrl", ["$http", "$window", function($http, $windo
 
 	self.update = function() {
 		highlightMutations();
-		drawBFactors();
 	};
 
 	mol = null;
@@ -66,6 +55,8 @@ debriefApp.controller("debriefCtrl", ["$http", "$window", function($http, $windo
 	};
 
 	drawLigands = function() {
+		// FAD is hard-coded (for MAO-N)
+		// Update to select ligands dynamically from mol
 		var ligand = mol.select({rnames : ["FAD"]});
 		viewer.ballsAndSticks("ligand", ligand);
 	};
@@ -130,44 +121,4 @@ debriefApp.controller("debriefCtrl", ["$http", "$window", function($http, $windo
 		view.addAtom(atom);
 		geom.colorBy(pv.color.uniform(color), view);
 	};
-
-	drawBFactors = function() {
-		elem = document.getElementById("b-factor-plot");
-		
-		if(googleLoaded && self.currMut() && self.currMut().b_factors) {
-			var options = {
-				hAxis: {
-					title: "Residue",
-				},
-				vAxis: {
-					title: "b-factor",
-					viewWindowMode: "explicit",
-		            viewWindow: {
-		            	max: self.maxBFactor()
-		            }
-				},
-				legend: {position: "none"}
-			};
-			
-			var data = new google.visualization.DataTable();
-			data.addColumn("number", "Residue");
-			data.addColumn("number", "b-factor");
-
-			b_factors = self.currMut().b_factors;
-			
-			for(var i=0; i < b_factors.length; i++) {
-				data.addRow([i + 1, b_factors[i]]);
-			}
-
-			var plot = new google.charts.Line(elem);
-			plot.draw(data, google.charts.Line.convertOptions(options));
-		}
-		else {
-			elem.innerHTML = "<div id='empty-plot'>No b-factor data available for current mutant.</div>";
-		}
-	};
-	
-	angular.element($window).on("resize", function() {
-		drawBFactors();
-	});
 }]);
