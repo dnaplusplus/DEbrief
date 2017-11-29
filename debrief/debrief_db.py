@@ -67,7 +67,7 @@ class DEBriefDBClient(object):
             if row[_COLS['ID']]:
                 mut = row[_COLS['MUTATIONS']]
                 muts[mut]['id'] = row[_COLS['ID']]
-                muts[mut]['name'] = mut.replace(' ', '_')
+                muts[mut]['name'] = mut
                 muts[mut]['active'] = row[_COLS['ACTIVE']] == 'TRUE'
                 muts[mut]['positions'] = mut_utils.parse_mut_str(mut)
 
@@ -120,7 +120,7 @@ class DEBriefDBClient(object):
         muts, _, _ = self.get_data(b_factors=False)
 
         for mutation in muts.values():
-            name = name_prefix + '|' + mutation['name']
+            name = name_prefix + '|' + mutation['name'].replace(' ', '_')
             seqs[mutation['id']] = (name, mutation['sequence'])
 
         return seqs
