@@ -7,27 +7,28 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-from collections import defaultdict
-from operator import itemgetter
 import StringIO
+from collections import defaultdict
 import csv
 import math
+from operator import itemgetter
 
 from Bio import Seq, SeqIO, SeqRecord
-from synbiochem.utils import mut_utils
 import requests
+
+from synbiochem.utils import mut_utils
 
 
 _URL = 'https://storage.googleapis.com/debrief'
 
-_COLS = {'NAME': 0,
-         'PDB': 2,
-         'TEMPLATE': 3,
-         'MUTATIONS': 4,
-         'ACTIVE': 6,
-         'SEQ': 15,
-         'BATCH': 17,
-         'ID': 18}
+_COLS = {'ID': 0,
+         'NAME': 1,
+         'PDB': 3,
+         'TEMPLATE': 4,
+         'MUTATIONS': 5,
+         'SEQ': 7,
+         'ACTIVE': 8,
+         'BATCH': 17}
 
 
 class DEBriefDBClient(object):
