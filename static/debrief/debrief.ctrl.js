@@ -2,10 +2,10 @@ debriefApp.controller("debriefCtrl", ["$http", "$window", function($http, $windo
 	var self = this;
 
 	self.busy = false;
-	self.projectId = "MAO-N";
+	self.projectId = "KSI";
 	self.pagination = {current: 1};
 	self.data = {"pdb": {"id": null}, "mutations": []};
-	self.showBFactors = true;
+	self.showBFactors = false;
 	
 	googleLoaded = false;
 
