@@ -45,7 +45,7 @@ debriefApp.controller("debriefCtrl", ["$http", "$window", function($http, $windo
 	currentLabels = [];
 
 	loadPdb = function() {
-		pv.io.fetchPdb("http://files.rcsb.org/download/" + self.data.pdb.id + ".pdb", function(newMol) {
+		pv.io.fetchPdb("//files.rcsb.org/download/" + self.data.pdb.id + ".pdb", function(newMol) {
 			mol = newMol;
 			geom = viewer.cartoon("protein", mol, {color: pv.color.uniform("lightgrey")});
 			drawLigands();
