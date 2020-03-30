@@ -1,9 +1,7 @@
 '''
-DEbrief (c) University of Manchester 2017
+DEbrief (c) GeneGenie Bioinformatics Limited
 
-DEbrief is licensed under the MIT License.
-
-To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
+All rights reserved.
 
 @author:  neilswainston
 '''
@@ -14,11 +12,10 @@ import uuid
 from apiclient import discovery
 import flask
 import httplib2
-from oauth2client import client
-from oauth2client.file import Storage
 
 from debrief.debrief_db import DEBriefDBClient
-
+from oauth2client import client
+from oauth2client.file import Storage
 
 APP = flask.Flask(__name__)
 
@@ -47,9 +44,9 @@ def oauth2callback():
     if 'code' not in flask.request.args:
         auth_uri = flow.step1_get_authorize_url()
         return flask.redirect(auth_uri)
-    else:
-        auth_code = flask.request.args.get('code')
-        credentials = flow.step2_exchange(auth_code)
+    # else:
+    auth_code = flask.request.args.get('code')
+    credentials = flow.step2_exchange(auth_code)
 
     # write access token to credentials.json locally
     open('credentials.json', 'w').write(credentials.to_json())

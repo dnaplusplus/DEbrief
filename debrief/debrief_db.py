@@ -1,22 +1,19 @@
 '''
-DEbrief (c) University of Manchester 2017
+DEbrief (c) GeneGenie Bioinformatics Limited
 
-DEbrief is licensed under the MIT License.
-
-To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
+All rights reserved.
 
 @author:  neilswainston
 '''
-import StringIO
 from collections import defaultdict
 import csv
+import io
 import math
 from operator import itemgetter
 
 from Bio import Seq, SeqIO, SeqRecord
 import requests
-
-from synbiochem.utils import mut_utils
+from debrief import mut_utils
 
 
 _URL = 'https://storage.googleapis.com/debrief'
@@ -31,7 +28,7 @@ _COLS = {'ID': 0,
          'BATCH': 17}
 
 
-class DEBriefDBClient(object):
+class DEBriefDBClient():
     '''Client class for DBBrief-DB.'''
 
     def __init__(self, project_id, values):
@@ -81,9 +78,9 @@ class DEBriefDBClient(object):
                         b_factors = self.__get_b_factors(row[_COLS['ID']])
                         muts[mut]['b_factors'] = _strip_nan(b_factors)
                         max_b_factor = max(max_b_factor, max(b_factors))
-                    except requests.HTTPError, err:
+                    except requests.HTTPError as err:
                         # Assume b-factor data has not yet been archived
-                        print err
+                        print(err)
 
                 if active_site_rmsd:
                     try:
@@ -93,9 +90,9 @@ class DEBriefDBClient(object):
                             _strip_nan(active_site_rmsd)
                         max_active_site_rmsd = \
                             max(max_active_site_rmsd, max(active_site_rmsd))
-                    except requests.HTTPError, err:
+                    except requests.HTTPError as err:
                         # Assume active site data has not yet been archived
-                        print err
+                        print(err)
 
         return muts, max_b_factor, max_active_site_rmsd
 
@@ -104,11 +101,11 @@ class DEBriefDBClient(object):
         records = [SeqRecord.SeqRecord(Seq.Seq(vals[1]),
                                        id=seq_id,
                                        description=vals[0])
-                   for seq_id, vals in self.get_sequences().iteritems()]
+                   for seq_id, vals in self.get_sequences().items()]
 
         records.sort(key=lambda x: int(x.id))
 
-        result = StringIO.StringIO()
+        result = io.StringIO()
         SeqIO.write(records, result, 'fasta')
         return result.getvalue()
 
