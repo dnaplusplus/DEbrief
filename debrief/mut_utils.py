@@ -1,19 +1,16 @@
 '''
-synbiochem (c) University of Manchester 2015
+DEbrief (c) GeneGenie Bioinformatics Limited
 
-synbiochem is licensed under the MIT License.
-
-To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
+All rights reserved.
 
 @author:  neilswainston
 '''
-# pylint: disable=useless-object-inheritance
 import re
 
 from synbiochem.utils import seq_utils
 
 
-class Mutation(object):
+class Mutation():
     '''Class to represent a mutation.'''
 
     def __init__(self, wt_res, pos, mut_res, typ='aa'):

@@ -5,6 +5,8 @@ All rights reserved.
 
 @author:  neilswainston
 '''
+# pylint: disable=no-member
+# pylint: disable=wrong-import-order
 import json
 import sys
 import uuid
@@ -12,10 +14,11 @@ import uuid
 from apiclient import discovery
 import flask
 import httplib2
-
-from debrief.debrief_db import DEBriefDBClient
 from oauth2client import client
 from oauth2client.file import Storage
+
+from debrief.debrief_db import DEBriefDBClient
+
 
 APP = flask.Flask(__name__)
 

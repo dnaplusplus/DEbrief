@@ -15,6 +15,10 @@ from Bio import Seq, SeqIO, SeqRecord
 import requests
 from debrief import mut_utils
 
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+
+SAMPLE_SPREADSHEET_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'
+SAMPLE_RANGE_NAME = 'Class Data!A2:E'
 
 _URL = 'https://storage.googleapis.com/debrief'
 
